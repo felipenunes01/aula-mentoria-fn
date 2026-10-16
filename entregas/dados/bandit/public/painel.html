@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bandit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
+<style>
+:root{--bg:#00012A;--card:#0D0E35;--card2:#15164a;--line:#24265e;--txt:#FFFFFF;--txt2:#A9ABD6;--txt3:#7174a8;
+  --ciano:#00DAFE;--verde:#22CA88;--verm:#F2545B;--ouro:#E2C77D;--r:16px}
+:root[data-theme="light"]{--bg:#F4F5FB;--card:#FFFFFF;--card2:#EEF0F8;--line:#DADDEE;--txt:#00012A;--txt2:#4a4d7a;--txt3:#8487ad}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:Manrope,system-ui,sans-serif;font-size:14px;line-height:1.4;overflow-x:hidden}
+button,select,input{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1280px;margin:0 auto;padding:0 16px 60px}
+header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.barra{max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.marca{font-weight:800;letter-spacing:.12em;color:var(--ciano);margin-right:6px}
+.f{display:flex;align-items:center;gap:6px;color:var(--txt3);font-size:12px}
+select,.btn{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 10px;cursor:pointer}
+.btn:hover{border-color:var(--ciano)}
+a.btn{color:var(--txt);text-decoration:none}
+.esp{flex:1}
+.atual{color:var(--txt3);font-size:12px}
+.atual.erro{color:var(--verm)}
+.gira{display:inline-block}
+.girando .gira{animation:g 1s linear infinite}@keyframes g{to{transform:rotate(360deg)}}
+.abas{max-width:1280px;margin:0 auto;padding:0 16px;display:flex;gap:4px}
+.aba{background:0;border:0;border-bottom:2px solid transparent;padding:8px 12px;color:var(--txt2);cursor:pointer;font-weight:700}
+.aba.on{color:var(--txt);border-color:var(--ciano)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-top:16px}
+.rot{color:var(--txt3);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.demo{margin-top:14px;padding:8px 14px;border-radius:10px;border:1px dashed var(--line);color:var(--txt2);font-size:12px}
+.linkurl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:16px;font-weight:700;word-break:break-all}
+.selo{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--card2)}
+.selo i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.no_ar i{background:var(--verde)} .no_ar{color:var(--verde)}
+.sem_braco i{background:var(--verm)} .sem_braco{color:var(--verm)}
+.pausado i{background:var(--txt3)}
+.meta{color:var(--txt2);margin-top:6px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.kpi .v{font-size:26px;font-weight:800;margin-top:2px}
+.kpi .b{color:var(--txt3);font-size:11px;margin-top:2px}
+.aviso{margin-top:10px;color:var(--txt2)}
+.aviso.erro{color:var(--verm)}
+table{width:100%;border-collapse:collapse}
+th{color:var(--txt3);font-size:11px;font-weight:700;text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:bottom}
+td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+tr.linha{cursor:pointer} tr.linha:hover td{background:var(--card2)} tr.foco td{background:var(--card2)}
+tr.tot td{font-weight:800;border-bottom:0}
+.bol{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px}
+.bnome{font-weight:800}
+.bmuda{color:var(--txt3);font-size:12px;margin-left:18px;white-space:normal;max-width:240px}
+.lider{color:var(--ouro);font-weight:800;font-size:12px;margin-left:6px}
+.falta{color:var(--txt3);font-size:12px;white-space:normal}
+.st{font-size:12px;font-weight:700}
+.st.pausado{color:var(--txt3)}
+.acoes{display:flex;gap:6px;justify-content:flex-end}
+.acoes .btn{padding:3px 8px;font-size:12px}
+.nota{color:var(--txt3);font-size:12px;margin-top:8px}
+.cards-bracos{display:none}
+.funis{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.funis.um{grid-template-columns:1fr}
+.funil{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.fcab{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;cursor:pointer}
+.fcab .bmuda{margin-left:18px}
+.etapa{display:grid;grid-template-columns:minmax(0,1.6fr) 64px minmax(60px,1fr) 72px;gap:8px;align-items:center;height:30px;font-size:13px}
+.etapa .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--txt2)}
+.etapa .n{text-align:right;font-weight:700}
+.etapa .bar{height:10px;border-radius:5px;background:var(--card2);overflow:hidden}
+.etapa .bar span{display:block;height:100%;border-radius:5px}
+.etapa .q{text-align:right;color:var(--txt3);font-size:12px}
+.etapa.gar .nm,.etapa.gar .q{color:var(--verm);font-weight:800}
+.etapa.gar{background:color-mix(in srgb,var(--verm) 10%,transparent);border-radius:8px}
+.rodape{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.rodape .v{font-size:22px;font-weight:800}
+.rodape .l{color:var(--txt3);font-size:11px}
+.frase{color:var(--txt2);font-size:12px;margin-top:8px}
+.fechado .corpo{display:none}
+.vazio{padding:40px;text-align:center;color:var(--txt2)}
+.sb td{text-align:left;white-space:normal;word-break:break-word}
+.sb{table-layout:fixed}
+.pop{position:absolute;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;z-index:30;display:none;min-width:240px}
+.pop.on{display:block}
+.pop button{display:block;width:100%;text-align:left;background:0;border:0;padding:6px 8px;border-radius:8px;cursor:pointer}
+.pop button:hover{background:var(--card2)}
+.pop .cal{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.pop input{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:4px 6px}
+.cfg h3{margin:0 0 8px}
+.cfg pre{background:var(--card2);padding:12px;border-radius:10px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+@media (max-width:820px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .tabela{display:none}
+  .cards-bracos{display:grid;gap:12px}
+  .cb{background:var(--card2);border-radius:12px;padding:12px}
+  .cb .g{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-top:10px}
+  .cb .g div{display:flex;justify-content:space-between;gap:6px}
+  .cb .g span:first-child{color:var(--txt3);font-size:12px}
+  .funis{grid-template-columns:1fr}
+  .etapa{grid-template-columns:minmax(0,1.4fr) 52px minmax(40px,.8fr) 60px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="barra">
+    <span class="marca">BANDIT</span>
+    <label class="f">Projeto <select id="fProjeto"></select></label>
+    <label class="f">Link <select id="fLink"></select></label>
+    <label class="f">Braço <select id="fBraco"></select></label>
+    <span style="position:relative">
+      <button class="btn" id="bPeriodo">Desde o início do teste ▾</button>
+      <div class="pop" id="pop">
+        <button data-p="hoje">Hoje</button><button data-p="ontem">Ontem</button>
+        <button data-p="7">Últimos 7 dias</button><button data-p="30">Últimos 30 dias</button>
+        <button data-p="mes">Este mês</button><button data-p="inicio">Desde o início do teste</button>
+        <div class="cal"><input type="date" id="dDe"> <input type="date" id="dAte"> <button class="btn" id="aplica" style="width:auto">Aplicar</button></div>
+      </div>
+    </span>
+    <span class="esp"></span>
+    <span class="atual num" id="atual"></span>
+    <button class="btn" id="bAtualiza"><span class="gira">↻</span> Atualizar</button>
+    <button class="btn" id="bTema" title="Tema">◐</button>
+  </div>
+  <div class="abas"><button class="aba on" data-aba="painel">Painel</button><button class="aba" data-aba="cfg">Configurações</button></div>
+</header>
+<main class="wrap">
+  <div id="painel"></div>
+  <div id="cfg" hidden></div>
+</main>
+<script>
+(function(){
+'use strict';
+var $ = function(s){ return document.querySelector(s); };
+var esc = function(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+var brl = function(v){ return v == null ? null : 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 }); };
+var pct = function(v){ return v == null ? 'sem dado' : v.toLocaleString('pt-BR', { minimumFractionDigits:1, maximumFractionDigits:1 }) + '%'; };
+var n = function(v){ return Number(v || 0).toLocaleString('pt-BR'); };
+var roas = function(v){ return v == null ? 'sem dado' : v.toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 }); };
+var hora = function(iso){ return new Date(iso).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit', timeZone:'America/Sao_Paulo' }); };
+var data = function(iso){ return new Date(iso).toLocaleDateString('pt-BR', { timeZone:'America/Sao_Paulo' }); };
+var dataHora = function(iso){ return new Date(iso).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', timeZone:'America/Sao_Paulo' }); };
+
+// tema
+try { var t = localStorage.getItem('bandit_tema'); if (t) document.documentElement.dataset.theme = t; } catch(e){}
+$('#bTema').onclick = function(){ var t = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'; document.documentElement.dataset.theme = t; try { localStorage.setItem('bandit_tema', t); } catch(e){} };
+
+// filtros: URL primeiro, depois o que o navegador lembra
+var F = {};
+(function(){
+  var q = new URLSearchParams(location.search), g = {};
+  try { g = JSON.parse(localStorage.getItem('bandit_filtros') || '{}'); } catch(e){}
+  ['projeto','link','braco','de','ate'].forEach(function(k){ F[k] = q.has(k) ? q.get(k) : (g[k] || ''); });
+})();
+function gravaFiltros(){
+  var q = new URLSearchParams();
+  Object.keys(F).forEach(function(k){ if (F[k]) q.set(k, F[k]); });
+  history.replaceState(null, '', '?' + q.toString());
+  try { localStorage.setItem('bandit_filtros', JSON.stringify(F)); } catch(e){}
+}
+
+var D = null, abertos = {}, ultimaBoa = null;
+
+function busca(){
+  var b = $('#bAtualiza'); b.classList.add('girando');
+  var q = new URLSearchParams(); Object.keys(F).forEach(function(k){ if (F[k]) q.set(k, F[k]); });
+  return fetch('/api/painel?' + q, { cache:'no-store' }).then(function(r){
+    if (r.status === 401) { location.href = '/login'; throw new Error('login'); }
+    if (!r.ok) throw new Error('http'); return r.json();
+  }).then(function(d){
+    D = d; ultimaBoa = d.atualizado_em;
+    $('#atual').className = 'atual num'; $('#atual').textContent = 'Atualizado às ' + hora(d.atualizado_em);
+    desenha();
+  }).catch(function(){
+    $('#atual').className = 'atual num erro';
+    $('#atual').textContent = ultimaBoa ? 'Não consegui atualizar. Mostrando os dados das ' + hora(ultimaBoa) + '.' : 'Não consegui atualizar.';
+  }).finally(function(){ b.classList.remove('girando'); });
+}
+
+function opcoes(sel, itens, valor, todos){
+  sel.innerHTML = (todos ? '<option value="">' + todos + '</option>' : '') + itens.map(function(i){
+    return '<option value="' + i.v + '"' + (String(i.v) === String(valor) ? ' selected' : '') + '>' + esc(i.t) + '</option>'; }).join('');
+}
+
+function rotuloPeriodo(){
+  if (!F.de && !F.ate) return 'Desde o início do teste';
+  return (F.de ? F.de.split('-').reverse().join('/') : '...') + ' a ' + (F.ate ? F.ate.split('-').reverse().join('/') : 'hoje');
+}
+
+function desenha(){
+  var d = D, el = $('#painel');
+  if (!d.projetos || !d.projetos.length) { el.innerHTML = '<div class="card vazio">' + esc(d.vazio) + '</div>'; return; }
+  opcoes($('#fProjeto'), d.projetos.map(function(p){ return { v:p.id, t:p.nome }; }), d.projeto.id);
+  opcoes($('#fLink'), d.links.map(function(l){ return { v:l.id, t:l.nome }; }), d.filtros ? d.filtros.link : '');
+  if (d.vazio) { el.innerHTML = '<div class="card vazio">' + esc(d.vazio) + '</div>'; return; }
+  opcoes($('#fBraco'), d.bracos.map(function(b){ return { v:b.id, t:b.letra + ' ' + b.nome }; }), F.braco, 'Todos');
+  $('#bPeriodo').textContent = rotuloPeriodo() + ' ▾';
+  $('#dDe').value = d.filtros.de; $('#dAte').value = d.filtros.ate;
+
+  var L = d.link, R = d.resumo, inv = d.investimento;
+  var estado = { no_ar:'No ar', sem_braco:'Sem braço ativo', pausado:'Pausado' }[L.status];
+  var naoLido = 'não lido' + (inv.ultima_boa ? ' (última leitura ' + dataHora(inv.ultima_boa) + ')' : '');
+  var dinheiro = function(v, sem){ return !inv.lido ? naoLido : (v == null ? sem : brl(v)); };
+  var foco = F.braco ? Number(F.braco) : null;
+  var h = '';
+  if (d.demonstracao) h += '<div class="demo">Demonstração: dados simulados para a aula. Nenhum número aqui é resultado real.</div>';
+
+  h += '<section class="card"><div class="rot">Link oficial</div><div class="linkurl"><span class="num">' + esc(L.url) + '</span>' +
+    '<button class="btn" id="copia">Copiar</button><span class="selo ' + L.status + '"><i></i>' + estado + '</span></div>' +
+    '<div class="meta">Objetivo: <b>' + (L.objetivo === 'lead' ? 'LEAD' : 'VENDA') + '</b> · Sorteio: ' + (L.modo === 'fixo' ? 'divisão fixa' : 'automático (bandit)') +
+    ' · Teste desde ' + data(L.inicio) + (L.nota_objetivo ? ' · <span style="color:var(--ouro)">' + esc(L.nota_objetivo) + '</span>' : '') + '</div>' +
+    (L.status === 'sem_braco' ? '<div class="aviso erro">Nenhum braço ativo: o clique está indo para a página de queda.</div>' : '') +
+    (d.aviso_sem_venda ? '<div class="aviso">' + esc(d.aviso_sem_venda) + '</div>' : '') +
+    (inv.falhou && inv.lido ? '<div class="aviso erro">A última leitura da Meta falhou (' + esc(inv.erro) + '). Mostrando a leitura de ' + dataHora(inv.ultima_boa) + '.</div>' : '') +
+    '</section>';
+
+  var k = function(rot, v, b){ return '<div class="kpi"><div class="rot">' + rot + '</div><div class="v num">' + v + '</div><div class="b">' + b + '</div></div>'; };
+  h += '<section class="kpis" style="margin-top:16px">' +
+    k('Investimento' + (R.base.investimento_estimado ? '*' : ''), inv.lido ? brl(R.investimento) : 'não lido', inv.lido ? (R.base.investimento_estimado ? 'estimativa pelo rateio dos cliques' : 'gasto da Meta neste link') : (inv.ultima_boa ? 'última leitura ' + dataHora(inv.ultima_boa) : 'Meta ainda não lida')) +
+    k('Retorno', brl(R.retorno), 'de ' + n(R.vendas) + ' vendas aprovadas') +
+    k('ROAS', inv.lido ? roas(R.roas) : 'não lido', 'retorno ÷ investimento') +
+    k('Vendas', n(R.vendas), 'do webhook, nunca do pixel') +
+    k('Conv. quiz', pct(R.conv_quiz_pct), 'de ' + n(R.base.acessos) + ' acessos') +
+    k('Conv. checkout', pct(R.conv_checkout_pct), 'de ' + n(R.base.checkout) + ' checkouts') +
+    '</section>';
+
+  // tabela de braços
+  var chance = function(b){ return b.status !== 'ativo' ? '' : (b.chance_melhor_pct != null ? pct(b.chance_melhor_pct) : '<span class="falta">' + esc(b.falta || 'sem dado') + '</span>'); };
+  var fatia = function(b){ return b.status !== 'ativo' ? '<span class="falta">fora do sorteio</span>' : pct(b.fatia_pct); };
+  var st = { ativo:'Ativo', pausado:'Pausado', rascunho:'Rascunho' };
+  var acoes = function(b){ return '<div class="acoes"><button class="btn" data-acao="' + (b.status === 'ativo' ? 'pausar' : 'ativar') + '" data-id="' + b.id + '">' + (b.status === 'ativo' ? 'Pausar' : 'Ativar') + '</button>' +
+    '<a class="btn" href="' + esc(b.url) + (b.url.indexOf('?') > -1 ? '&' : '?') + 'revisao=1" target="_blank" rel="noopener">Abrir</a>' +
+    '<button class="btn" data-funil="' + b.id + '">Ver funil</button></div>'; };
+  h += '<section class="card"><div class="rot">Braços</div><div class="tabela" style="overflow:hidden"><table class="num"><thead><tr>' +
+    ['Braço','Status','Fatia do tráfego','Chance de ser o melhor','Acessos','Interação','Checkout','Vendas','Conv. quiz','Conv. checkout','Investimento*','Retorno','ROAS','CPA',''].map(function(x){ return '<th>' + x + '</th>'; }).join('') +
+    '</tr></thead><tbody>' +
+    d.bracos.map(function(b){
+      return '<tr class="linha' + (foco === b.id ? ' foco' : '') + '" data-b="' + b.id + '"><td><span class="bol" style="background:' + b.cor + '"></span><span class="bnome">' + esc(b.letra + ' ' + b.nome) + '</span>' +
+        (b.lider ? '<span class="lider">★ líder</span>' : '') + '<div class="bmuda">' + esc(b.muda) + '</div></td>' +
+        '<td><span class="st ' + b.status + '">' + st[b.status] + '</span></td><td>' + fatia(b) + '</td><td>' + chance(b) + '</td>' +
+        '<td>' + n(b.acessos) + '</td><td>' + pct(b.interacao_pct) + '</td><td>' + n(b.checkout) + '</td><td>' + n(b.vendas) + '</td>' +
+        '<td>' + pct(b.conv_quiz_pct) + '</td><td>' + pct(b.conv_checkout_pct) + '</td><td>' + dinheiro(b.investimento, 'sem dado') + '</td>' +
+        '<td>' + brl(b.retorno) + '</td><td>' + (inv.lido ? roas(b.roas) : 'não lido') + '</td><td>' + (inv.lido ? (b.cpa == null ? 'sem venda' : brl(b.cpa)) : 'não lido') + '</td><td>' + acoes(b) + '</td></tr>';
+    }).join('') +
+    '<tr class="tot"><td>Total</td><td></td><td></td><td></td><td>' + n(d.total.acessos) + '</td><td>' + pct(d.total.interacao_pct) + '</td><td>' + n(d.total.checkout) + '</td><td>' + n(d.total.vendas) + '</td>' +
+    '<td>' + pct(d.total.conv_quiz_pct) + '</td><td>' + pct(d.total.conv_checkout_pct) + '</td><td>' + dinheiro(d.total.investimento, 'sem dado') + '</td><td>' + brl(d.total.retorno) + '</td><td>' + (inv.lido ? roas(d.total.roas) : 'não lido') + '</td><td>' + (inv.lido ? (d.total.cpa == null ? 'sem venda' : brl(d.total.cpa)) : 'não lido') + '</td><td></td></tr>' +
+    '</tbody></table></div>';
+  // celular: cartões
+  h += '<div class="cards-bracos num">' + d.bracos.map(function(b){
+    var c = function(r, v){ return '<div><span>' + r + '</span><span>' + v + '</span></div>'; };
+    return '<div class="cb" data-b="' + b.id + '"><span class="bol" style="background:' + b.cor + '"></span><span class="bnome">' + esc(b.letra + ' ' + b.nome) + '</span>' + (b.lider ? '<span class="lider">★ líder</span>' : '') +
+      ' <span class="st ' + b.status + '">' + st[b.status] + '</span><div class="bmuda" style="margin-left:0">' + esc(b.muda) + '</div><div class="g">' +
+      c('Fatia', fatia(b)) + c('Chance', chance(b)) + c('Acessos', n(b.acessos)) + c('Interação', pct(b.interacao_pct)) + c('Checkout', n(b.checkout)) + c('Vendas', n(b.vendas)) +
+      c('Conv. quiz', pct(b.conv_quiz_pct)) + c('Conv. checkout', pct(b.conv_checkout_pct)) + c('Invest.*', dinheiro(b.investimento, 'sem dado')) + c('Retorno', brl(b.retorno)) +
+      c('ROAS', inv.lido ? roas(b.roas) : 'não lido') + c('CPA', inv.lido ? (b.cpa == null ? 'sem venda' : brl(b.cpa)) : 'não lido') + '</div><div style="margin-top:10px">' + acoes(b) + '</div></div>';
+  }).join('') + '</div>';
+  h += '<div class="nota">* por braço é estimativa (rateio pelos cliques). Amostra mínima para apontar vencedor: ' + d.minimo.acessos + ' acessos e ' + d.minimo.conv + (L.objetivo === 'lead' ? ' leads' : ' vendas') + ' por braço.' +
+    ' <button class="btn" id="csv" style="margin-left:8px">Exportar CSV</button></div></section>';
+
+  // funis
+  var mostrados = foco ? d.bracos.filter(function(b){ return b.id === foco; }) : d.bracos;
+  h += '<section class="card" style="background:0;border:0;padding:0"><div class="rot" style="margin-left:2px">Funil de cada braço</div><div class="funis' + (foco ? ' um' : '') + '">' +
+    mostrados.map(function(b){
+      var temGar = b.funil.some(function(s){ return s.gargalo; });
+      var aberto = abertos[b.id] != null ? abertos[b.id] : true;
+      if (temGar && abertos[b.id] == null) aberto = true;
+      return '<div class="funil' + (aberto ? '' : ' fechado') + '" id="funil-' + b.id + '"><div class="fcab" data-tg="' + b.id + '"><div><span class="bol" style="background:' + b.cor + '"></span><span class="bnome">' + esc(b.letra + ' ' + b.nome) + '</span> <span class="st ' + b.status + '">' + st[b.status] + '</span>' +
+        '<div class="bmuda">"' + esc(b.muda) + '"</div></div><span style="color:var(--txt3)">' + (aberto ? '▾' : '▸') + '</span></div><div class="corpo num" style="margin-top:10px">' +
+        b.funil.map(function(s){
+          var q = s.gargalo ? '▼ -' + Math.round(s.queda_pct) + '%' : (s.seguiu_pct != null ? pct(s.seguiu_pct) : '');
+          return '<div class="etapa' + (s.gargalo ? ' gar' : '') + '" title="' + esc(s.nome) + (s.perdeu != null ? ': perderam ' + n(s.perdeu) + ' (' + pct(s.perdeu_pct) + ')' : '') + '"><span class="nm">' + esc(s.nome) + '</span><span class="n">' + n(s.n) + '</span>' +
+            '<span class="bar"><span style="width:' + (s.barra_pct || 0) + '%;background:' + b.cor + '"></span></span><span class="q">' + q + '</span></div>';
+        }).join('') +
+        '<div class="rodape"><div><div class="v">' + pct(b.conclusao_pct) + '</div><div class="l">Conclusão do quiz</div></div><div><div class="v">' + pct(b.conv_checkout_pct) + '</div><div class="l">Checkout → venda</div></div><div><div class="v">' + pct(b.conv_quiz_pct) + '</div><div class="l">Quiz → venda</div></div></div>' +
+        '<div class="frase">' + esc(b.frase) + '.</div></div></div>';
+    }).join('') + '</div></section>';
+
+  if (d.sem_braco.length) h += '<section class="card"><div class="rot">Vendas sem braço (' + d.sem_braco.length + ')</div><div class="meta">Venda que chegou do checkout e não casou com nenhuma visita. Fica à vista, nunca é descartada. Entra no total do projeto, em nenhum braço.</div>' +
+    '<table class="sb num" style="margin-top:8px"><tbody>' + d.sem_braco.map(function(v){ return '<tr><td>' + dataHora(v.criado_em) + '</td><td>' + brl(v.valor_reais) + '</td><td>' + esc(v.produto) + '</td><td style="color:var(--txt3)">' + esc(v.motivo) + '</td></tr>'; }).join('') + '</tbody></table></section>';
+  if (d.fora_dos_testes.length) h += '<section class="card"><div class="rot">Fora dos testes</div><div class="meta">Gasto da Meta em anúncios que não apontam para nenhum link oficial.</div><table class="sb num" style="margin-top:8px"><tbody>' +
+    d.fora_dos_testes.map(function(f){ return '<tr><td>' + esc(f.anuncio_nome) + '</td><td style="color:var(--txt3)">' + esc(f.destino) + '</td><td style="text-align:right">' + brl(f.valor) + '</td></tr>'; }).join('') + '</tbody></table></section>';
+  if (!d.total.cliques) h += '<div class="card vazio">Nenhum clique ainda. Cole o link oficial no anúncio.</div>';
+
+  var y = window.scrollY;
+  el.innerHTML = h;
+  window.scrollTo(0, y);
+
+  $('#copia').onclick = function(){ var b = this; navigator.clipboard.writeText(L.url).then(function(){ b.textContent = 'Copiado'; setTimeout(function(){ b.textContent = 'Copiar'; }, 2000); }); };
+  $('#csv').onclick = function(){ var q = new URLSearchParams(); Object.keys(F).forEach(function(k){ if (F[k]) q.set(k, F[k]); }); location.href = '/api/exportar?' + q; };
+  el.querySelectorAll('[data-acao]').forEach(function(b){ b.onclick = function(e){ e.stopPropagation();
+    b.disabled = true; fetch('/api/braco', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id:Number(b.dataset.id), acao:b.dataset.acao }) }).then(busca); }; });
+  el.querySelectorAll('[data-funil]').forEach(function(b){ b.onclick = function(e){ e.stopPropagation(); abertos[b.dataset.funil] = true; desenha(); var f = document.getElementById('funil-' + b.dataset.funil); if (f) f.scrollIntoView({ behavior:'smooth', block:'start' }); }; });
+  el.querySelectorAll('.acoes a').forEach(function(a){ a.onclick = function(e){ e.stopPropagation(); }; });
+  el.querySelectorAll('tr.linha,.cb').forEach(function(tr){ tr.onclick = function(){ F.braco = F.braco === tr.dataset.b ? '' : tr.dataset.b; gravaFiltros(); busca(); }; });
+  el.querySelectorAll('[data-tg]').forEach(function(c){ c.onclick = function(){ var id = c.dataset.tg; var f = document.getElementById('funil-' + id); abertos[id] = f.classList.contains('fechado'); desenha(); }; });
+}
+
+// filtros
+$('#fProjeto').onchange = function(){ F.projeto = this.value; F.link = ''; F.braco = ''; gravaFiltros(); busca(); };
+$('#fLink').onchange = function(){ F.link = this.value; F.braco = ''; gravaFiltros(); busca(); };
+$('#fBraco').onchange = function(){ F.braco = this.value; gravaFiltros(); busca(); };
+$('#bPeriodo').onclick = function(e){ e.stopPropagation(); $('#pop').classList.toggle('on'); };
+$('#pop').onclick = function(e){ e.stopPropagation(); };
+document.addEventListener('click', function(){ $('#pop').classList.remove('on'); });
+var diaSP = function(off){ var d = new Date(Date.now() - 3 * 3600000 - (off || 0) * 86400000); return d.toISOString().slice(0, 10); };
+$('#pop').querySelectorAll('[data-p]').forEach(function(b){ b.onclick = function(){
+  var p = b.dataset.p, hoje = diaSP(0);
+  if (p === 'hoje') { F.de = hoje; F.ate = hoje; }
+  else if (p === 'ontem') { F.de = diaSP(1); F.ate = diaSP(1); }
+  else if (p === '7') { F.de = diaSP(6); F.ate = hoje; }
+  else if (p === '30') { F.de = diaSP(29); F.ate = hoje; }
+  else if (p === 'mes') { F.de = hoje.slice(0, 8) + '01'; F.ate = hoje; }
+  else { F.de = ''; F.ate = ''; }
+  $('#pop').classList.remove('on'); gravaFiltros(); busca(); }; });
+$('#aplica').onclick = function(){ F.de = $('#dDe').value; F.ate = $('#dAte').value; $('#pop').classList.remove('on'); gravaFiltros(); busca(); };
+$('#bAtualiza').onclick = busca;
+
+// abas
+document.querySelectorAll('.aba').forEach(function(a){ a.onclick = function(){
+  document.querySelectorAll('.aba').forEach(function(x){ x.classList.toggle('on', x === a); });
+  $('#painel').hidden = a.dataset.aba !== 'painel'; $('#cfg').hidden = a.dataset.aba !== 'cfg';
+  if (a.dataset.aba === 'cfg') config();
+}; });
+
+function config(){
+  fetch('/api/config').then(function(r){ return r.json(); }).then(function(c){
+    var pr = c.projetos[0]; if (!pr) { $('#cfg').innerHTML = '<div class="card vazio">Nenhum projeto.</div>'; return; }
+    var pl = c.plataformas.zouti;
+    var h = '<div class="cfg">';
+    h += '<section class="card"><h3>1. Projeto</h3><div class="meta">' + esc(pr.nome) + ' · domínio do link oficial: ' + esc(pr.dominio || c.base) + '</div></section>';
+    h += '<section class="card"><h3>2. Links oficiais</h3>' + pr.links.map(function(l){ return '<div class="meta"><b>' + esc(l.nome) + '</b> · ' + esc(c.base + '/l/' + l.slug) + ' · objetivo ' + l.objetivo + ' · sorteio ' + (l.modo === 'auto' ? 'automático' : 'divisão fixa') +
+      ' · início ' + data(l.inicio) + ' · produtos: ' + esc(l.produtos.join(', ') || 'nenhum') + ' · origens: ' + esc(JSON.parse(l.origens).join(', ')) + '</div>'; }).join('') + '</section>';
+    h += '<section class="card"><h3>3. Braços</h3>' + pr.links.map(function(l){ return l.bracos.map(function(b){ return '<div class="meta"><span class="bol" style="background:' + b.cor + '"></span><b>' + esc(b.letra + ' ' + b.nome) + '</b> · ' + esc(b.status) + ' · ' + esc(b.muda) +
+      ' · <a style="color:var(--ciano)" target="_blank" href="' + esc(b.url) + '&revisao=1">Testar</a></div>'; }).join(''); }).join('') + '</section>';
+    h += '<section class="card"><h3>4. Webhook do checkout</h3><div class="meta">Plataforma: <b>' + esc(pl.nome) + '</b>' + (pl.confirmado ? '' : ' · <span style="color:var(--ouro)">[SEM DADO] autenticação a confirmar na documentação oficial</span>') + '</div>' +
+      '<pre>' + esc(pr.webhook_url + 'zouti') + '</pre><ol class="meta">' + pl.passos.map(function(p){ return '<li>' + esc(p) + '</li>'; }).join('') + '</ol>' +
+      '<div class="rot" style="margin-top:12px">Últimos recebimentos</div><table class="sb num"><tbody>' + (pr.log.length ? pr.log.map(function(g){ return '<tr><td>' + dataHora(g.quando) + '</td><td>' + esc(g.plataforma) + '</td><td>' + esc(g.status || '') + '</td><td>' + (g.valor != null ? brl(g.valor) : '') + '</td><td>' + (g.http === 200 ? (g.casou ? 'casou (' + esc(g.degrau) + ')' : 'sem braço') : '<span style="color:var(--verm)">recusado ' + g.http + '</span>') + '</td><td style="color:var(--txt3)">' + esc(g.erro || '') + '</td></tr>'; }).join('') : '<tr><td>Nenhum recebimento ainda.</td></tr>') + '</tbody></table></section>';
+    h += '<section class="card"><h3>5. Meta Ads</h3><div class="meta">' + (pr.meta_token ? 'Token configurado no servidor.' : 'Token não configurado. Coloque META_TOKEN no .env (usuário do sistema, permissão ads_read).') + '</div></section>';
+    h += '<section class="card"><h3>6. Script de rastreio</h3><pre>' + esc('<script src="' + c.base + '/bandit.js" data-checkout="src,sck"><\/script>\n\n// no quiz:\nbandit.etapa(3, "Qual a sua idade?");\nbandit.final();\nbandit.lead(email, whatsapp);\nlocation.href = bandit.checkout(URL_DO_CHECKOUT);') + '</pre></section>';
+    h += '<section class="card"><button class="btn" id="recalc">Recalcular agora</button> <span class="meta" id="recalcMsg"></span></section>';
+    $('#cfg').innerHTML = h + '</div>';
+    $('#recalc').onclick = function(){ fetch('/api/recalcular', { method:'POST' }).then(function(r){ return r.json(); }).then(function(j){ $('#recalcMsg').textContent = j.ok ? 'Pesos recalculados.' : j.erro; busca(); }); };
+  });
+}
+
+// atualização automática: 60 s, silenciosa, pausa com a aba escondida
+var timer = setInterval(function(){ if (!document.hidden) busca(); }, 60000);
+document.addEventListener('visibilitychange', function(){ if (!document.hidden) busca(); });
+busca();
+})();
+</script>
+</body>
+</html>
