@@ -1,0 +1,11 @@
+{
+  "name": "bandit",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --no-warnings server.js",
+    "seed": "node --no-warnings scripts/seed.js",
+    "simular": "node --no-warnings scripts/simular.js"
+  },
+  "engines": { "node": ">=22.5" }
+}

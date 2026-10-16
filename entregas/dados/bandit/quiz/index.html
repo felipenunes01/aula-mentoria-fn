@@ -1,0 +1,3458 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>A Revolução do Quiz · Mentor Scale</title>
+<meta name="description" content="A Revolução do Quiz: faça o diagnóstico e entenda a lógica e a engenharia do quiz que vende.">
+<meta property="og:title" content="Quanto a sua operação está deixando na mesa">
+<meta property="og:description" content="Diagnóstico em 2 minutos, sem digitar nada.">
+<meta property="og:type" content="website">
+<!-- o handshake com os hosts do player acontece enquanto a pessoa le a capa,
+     e nao na hora em que o video precisa aparecer -->
+<link rel="preconnect" href="https://www.youtube-nocookie.com">
+<link rel="preconnect" href="https://www.youtube.com">
+<link rel="preconnect" href="https://i.ytimg.com">
+<link rel="preconnect" href="https://rr1---sn-25glene6.googlevideo.com" crossorigin>
+<link rel="dns-prefetch" href="https://googlevideo.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Manrope:wght@500;600;700;800&display=swap">
+
+<!-- Bandit: script de rastreio (vid no src e no sck do checkout) -->
+<script src="/bandit.js" data-checkout="src,sck"></script>
+
+<script>
+/* =====================================================================
+   O UNICO BLOCO QUE O OPERADOR MEXE.
+   Tudo que esta como TODO nao carrega e nao dispara. Trocar antes de subir.
+   ===================================================================== */
+window.CFG = {
+  META_PIXEL_ID:   'TODO' /* réplica da aula: pixel desligado */,
+  GA4_ID:          'TODO',
+  N8N_WEBHOOK_URL: 'TODO',
+  ANALYTICS_URL:   'TODO',
+  /* 16/10: o link antigo (md5ba...) era o checkout do Diagnóstico Mentor Scale,
+     outro produto. Este é o da Revolução do Quiz, R$ 97. */
+  CHECKOUT_URL:    '/checkout-demo' /* réplica da aula: checkout de demonstração */,
+  CHECKOUT_MODE:   'redirect',
+  VARIANT:         'quiz-do-quiz-perpetuo-v1',
+  /* o lead entra no Falume por este endpoint do próprio Worker */
+  LEAD_API:        'TODO',
+  /* 16/10: a bifurcação para a implementação com o time (braço case_bif do
+     bandit). A agenda do Ricardo mora no Worker; sem ela conectada, quem
+     passa na régua cai no WhatsApp do time, (11) 5254-0120. */
+  AGENDA_API:      'TODO',
+  WHATS_TIME:      '551152540120',
+
+  /* PRECO: valor provisorio, o Carlos ainda nao fechou.
+     Trocar aqui muda a oferta inteira, nao ha preco escrito no HTML. */
+  /* O preco de verdade vive em PRECO_NUM. As duas linhas de texto e o
+     percentual de desconto sao calculados a partir dele e da soma do stack,
+     entao mudar o numero aqui acerta a pagina inteira de uma vez. */
+  PRECO_NUM:       97,
+  PRECO:           'R$ 97',
+  /* sem o parcelamento confirmado na Zouti, a página diz só cartão ou Pix */
+  PARCELA:         '',
+  GARANTIA_DIAS:   7,
+  TIMER_MIN:       10,
+  /* 16/10: segundos ate o Continuar liberar na tela de video (ou o fim do
+     video, o que vier primeiro). Video ja visto libera na hora. */
+  VIDEO_SEGURA_S:  12,
+  /* Valores do stack. Sao ILUSTRATIVOS ate o Carlos definir os reais.
+     A soma aparece na pagina, entao mexer aqui muda a ancoragem. */
+  VAL_METODO:      1997,
+  VAL_BONUS:       [497, 897, 697],
+
+  /* As duas fotos da capa. Enquanto vazias, a capa mostra o circulo com emoji. */
+  FOTO_HOMEM:      'img/homem.webp',
+  FOTO_MULHER:     'img/mulher.webp',
+
+  /* Numeros reais dos nossos quizzes no ar. Enquanto vazio, o bloco
+     "de acordo com as suas respostas" nao aparece na oferta.
+     Formato: [{ n:'83%', txt:'...', fonte:'...' }] */
+  PROVA_NUMEROS:   [
+    { n:'R$ 22 milhões', txt:'vendidos com quiz na operação de lançamentos do Pablo Marçal.',
+      fonte:'Operação acompanhada pelo Ricardo Castro, sócio da Mentor Scale.' },
+    { n:'8 a 9%', txt:'de conversão em ingresso vendido no último lançamento do Pablo Marçal, já com o quiz refeito com IA.',
+      /* 16/10: a linha de fonte saiu da tela a pedido (o dado e da reuniao de 02/10/2026) */
+      fonte:'' }
+  ],
+
+  DEBUG: false
+};
+</script>
+
+<style>
+:root{
+  color-scheme: dark;
+  --deep:#0A0F0A; --halo:#16351B;
+  --card:#131C14; --card2:#1A2620; --line:#27332A; --line2:#35443A;
+  --yel:#FFD200; --yel2:#FFA800; --yel-soft:rgba(255,210,0,.12); --on-yel:#0A0F0A;
+  --txt:#F2F0E6; --txt2:#A6AFA6; --txt3:#748076;
+  --red:#FF6B5A; --grn:#5FCF8A;
+  --r:18px;
+  --fd:"Sora",system-ui,-apple-system,sans-serif;
+  --ft:"Manrope",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--ft); color:var(--txt); font-size:16px; line-height:1.45;
+  background:
+    radial-gradient(120% 70% at 12% 0%, rgba(22,53,27,.9) 0%, rgba(10,15,10,0) 58%),
+    radial-gradient(90% 60% at 95% 100%, rgba(22,53,27,.55) 0%, rgba(10,15,10,0) 55%),
+    var(--deep);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+button,input{font:inherit;color:inherit}
+h1,h2,h3,h4{font-family:var(--fd);margin:0;line-height:1.14;letter-spacing:-.03em;
+  font-weight:600;text-wrap:balance}
+h1{font-size:clamp(25px,6.4vw,34px);font-weight:800}
+h2{font-size:clamp(20px,5.2vw,27px)}
+h3{font-size:clamp(17px,4.4vw,21px)}
+p{margin:0;color:var(--txt2)}
+b{color:var(--txt)}
+em{font-style:normal;color:var(--yel)}
+.hide{display:none!important}
+
+/* ---------- topo ---------- */
+#topo{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;
+  background:rgba(10,15,10,.88);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line)}
+/* uma barra so: voltar, progresso, passo e o cofre dividem a mesma linha.
+   Duas barras empilhadas comiam 84px do alto da tela, que e o espaco que o
+   video precisa pra caber junto com o botao fixo. */
+/* nada de position:relative aqui: a regra sobrescrevia o position:sticky
+   de cima e o cabecalho parava de grudar no topo ao rolar. O sticky ja
+   serve de referencia pro .barra posicionado por absolute. */
+.topo-in{max-width:560px;margin:0 auto;padding:9px 14px;display:flex;align-items:center;gap:9px}
+/* so a seta: com a palavra "Voltar" nao sobrava largura pra barra de
+   progresso depois que o cofre entrou na mesma linha */
+#voltar{background:0;border:0;padding:6px 2px;color:var(--txt3);font-size:17px;
+  line-height:1;font-family:var(--fd);cursor:pointer;flex:0 0 auto}
+/* na capa nao ha pra onde voltar, mas o espaco fica guardado pra barra nao
+   pular de largura quando o botao aparece na pergunta seguinte */
+#voltar.hide{display:inline-block!important;visibility:hidden}
+#voltar:hover{color:var(--txt)}
+/* o progresso deixou de disputar largura com o resto: virou o filete do
+   rodape do cabecalho, na largura inteira da tela. Assim o rotulo "Seus
+   presentes" cabe na linha sem espremer nada. */
+.barra{position:absolute;left:0;right:0;bottom:0;height:3px;background:#101A12;overflow:hidden}
+.barra i{display:block;height:100%;width:3%;
+  background:linear-gradient(90deg,var(--yel2),var(--yel));transition:width .45s cubic-bezier(.22,1,.36,1)}
+
+/* ---------- palco ---------- */
+.wrap{width:100%;max-width:560px;margin:0 auto;padding:20px 16px 48px}
+/* espaco no pe pra nada ficar escondido atras da barra fixa */
+body.com-barra .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+#tela{display:flex;flex-direction:column;gap:16px;animation:entra .32s cubic-bezier(.16,1,.3,1) both}
+/* 16/10: o conteudo fica no meio da altura, e nao colado no topo. A abertura
+   do case, os videos e a oferta tem desenho proprio e ficam de fora. */
+body.centro #tela{min-height:calc(100svh - var(--topo-h,52px) - 68px);justify-content:center;
+  padding-bottom:4vh}
+@keyframes entra{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){ #tela{animation:none} }
+
+.selo{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;
+  padding:6px 13px;border-radius:99px;background:var(--yel-soft);
+  border:1px solid rgba(255,210,0,.4);color:var(--yel);
+  font-family:var(--fd);font-size:10px;font-weight:600;letter-spacing:.13em;text-transform:uppercase}
+.selo i{width:6px;height:6px;border-radius:50%;background:var(--yel);
+  animation:pisca 1.5s infinite;font-style:normal}
+@keyframes pisca{0%,100%{opacity:1}50%{opacity:.25}}
+.qnum{font-family:var(--fd);font-size:10.5px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--txt3)}
+.peq{font-size:14px;color:var(--txt2)}
+
+/* ---------- opcoes ---------- */
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:15px 14px;border-radius:15px;background:var(--card);
+  border:1.5px solid var(--line);font-size:15px;font-weight:600;color:var(--txt);
+  cursor:pointer;position:relative;
+  transition:transform .18s,border-color .2s,background .2s,box-shadow .25s}
+.opt .em{font-size:22px;line-height:1;flex:0 0 auto;transition:transform .25s}
+.opt .tx{flex:1;min-width:0}
+.opt .go{width:23px;height:23px;border-radius:50%;border:1.5px solid var(--line2);
+  flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:transparent;transition:.2s}
+/* 16/10: hover so onde existe mouse. No celular o :hover "gruda" depois do
+   toque e a opcao na mesma altura da pergunta seguinte ja aparecia marcada */
+@media (hover:hover) and (pointer:fine){
+  .opt:hover{border-color:rgba(255,210,0,.55);transform:translateX(4px);background:var(--card2)}
+  .opt:hover .em{transform:scale(1.14) rotate(-6deg)}
+}
+.opt:active{transform:scale(.985)}
+.opt:focus-visible{outline:2px solid var(--yel);outline-offset:3px}
+.opt.on{background:linear-gradient(100deg,var(--yel),var(--yel2));color:var(--on-yel);
+  border-color:var(--yel);transform:translateX(0) scale(1.015);
+  box-shadow:0 12px 30px rgba(255,180,0,.3)}
+.opt.on .go{border-color:var(--on-yel);background:var(--on-yel);color:var(--yel)}
+.opt.on .em{transform:scale(1.22)}
+@media (prefers-reduced-motion: reduce){ .opt,.opt .em{transition:none} }
+
+/* ---------- capa com as duas fotos ---------- */
+.fotos{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fcard{border:1.5px solid var(--line);border-radius:16px;padding:14px 10px;background:var(--card);
+  display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;
+  font-weight:700;font-size:15px;color:var(--txt);
+  transition:border-color .2s,background .2s,transform .2s}
+@media (hover:hover) and (pointer:fine){
+  .fcard:hover{border-color:rgba(255,210,0,.55);background:var(--card2);transform:translateY(-3px)}
+}
+.fcard:focus-visible{outline:2px solid var(--yel);outline-offset:3px}
+.fcard.on{border-color:var(--yel);
+  background:linear-gradient(160deg,rgba(255,210,0,.16),var(--card) 62%)}
+/* moldura de busto: o boneco vai do cabelo ate os bracos cruzados, entao a
+   caixa e so um pouco mais alta que larga. Num circulo o cabelo da mulher
+   seria cortado dos dois lados. object-fit:contain com largura E altura em
+   100%, porque height:100% sozinho nao resolve dentro de uma caixa com
+   aspect-ratio e a imagem acaba cortada. */
+.fcard .ret{position:relative;width:100%;aspect-ratio:4/5;border-radius:12px;
+  overflow:hidden;display:grid;place-items:center;font-size:44px}
+/* a imagem e posicionada por inset, nao por height:100%: altura em
+   porcentagem nao resolve contra uma altura que veio de aspect-ratio, e a
+   imagem estourava a moldura (379px numa caixa de 202) e saia cortada */
+.fcard .ret img{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:contain;object-position:center bottom;display:block}
+
+/* ---------- botoes ---------- */
+.btn{border:0;border-radius:15px;padding:17px 14px;width:100%;cursor:pointer;
+  font-family:var(--fd);font-size:15.5px;font-weight:600;color:var(--on-yel);
+  background:linear-gradient(100deg,var(--yel),var(--yel2));
+  box-shadow:0 12px 30px rgba(255,180,0,.26);
+  position:relative;overflow:hidden;transition:transform .16s,box-shadow .25s}
+.btn:active{transform:scale(.975)}
+.btn:focus-visible{outline:2px solid var(--txt);outline-offset:3px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+.btn::after{content:"";position:absolute;top:0;bottom:0;width:70px;left:-90px;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);
+  animation:brilho 2.8s linear infinite}
+@keyframes brilho{0%{left:-90px}55%,100%{left:120%}}
+@media (prefers-reduced-motion: reduce){ .btn::after{display:none} }
+.btn.fantasma{background:transparent;border:1px solid var(--line);color:var(--txt2);
+  box-shadow:none;font-weight:500;font-size:14px;padding:14px}
+.btn.fantasma::after{display:none}
+
+/* ---------- video ---------- */
+/* O player do YouTube sempre entrega 16:9, e um video vertical dentro dele
+   vem com tarja preta dos dois lados, o que faz parecer quadrado. A saida e
+   ampliar o iframe ate o video ocupar a largura inteira da caixa 9:16 e
+   cortar o que sobra. Com altura 100% e proporcao 16/9, o video vertical
+   dentro dele mede exatamente a largura da caixa. */
+/* a tela de video inteira centralizada: o player no meio com o texto
+   encostado na esquerda ficava torto */
+/* A tela de video ocupa a altura util e nada mais: o player pega o que sobra
+   entre o texto e o botao fixo. svh e a altura com as barras do navegador
+   VISIVEIS, que e o pior caso: com vh o botao ficava atras da barra do
+   Safari, que foi o que o Carlos viu no iPhone. */
+.tela-video{display:flex;flex-direction:column;align-items:center;
+  text-align:center;gap:12px;width:100%}
+.tela-video h2{max-width:22ch}
+.tela-video .peq{max-width:34ch}
+/* O palco dos videos NAO mora dentro do #tela: o #tela tem o innerHTML
+   trocado a cada passo, e isso destruiria o iframe. Iframe destruido e
+   iframe que carrega tudo de novo na proxima vez, que era o travamento no
+   celular. Aqui os players nascem uma vez e ficam vivos ate o fim do quiz.
+   Mover um iframe de lugar no DOM tambem forca recarga, entao ele nunca
+   muda de pai: so aparece e some. */
+#videos{flex:1;min-height:0;display:flex;justify-content:center;
+  align-items:center;width:100%}
+/* na tela de video a coluna toda vira flex, pra sobra de altura cair no
+   palco em vez de virar espaco morto embaixo do texto */
+body.tela-de-video .wrap{height:calc(100svh - 48px);display:flex;
+  flex-direction:column;gap:14px}
+body.tela-de-video #tela{flex:0 0 auto}
+.player{position:relative;
+  height:100%;width:auto;max-width:100%;
+  aspect-ratio:9/16;
+  border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#000;
+  display:none}
+.player.on{display:block}
+.player iframe{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  height:100%;width:auto;aspect-ratio:16/9;border:0;
+  /* nada de clique chegando no player: e o que faz aparecer titulo,
+     botao de compartilhar e o "assistir no YouTube" */
+  pointer-events:none}
+/* modo manual (16/10): quando o video nao comeca com som pelo nosso botao
+   (iPhone), o player do YouTube aparece com o play dele e aceita o toque */
+.player.manual iframe{pointer-events:auto}
+/* a faixa cobre o player inteiro: o toque vale em qualquer lugar, nao so
+   no risco amarelo do pe */
+/* fim do video: o player escurece e o Continuar pisca, pra ficar obvio que
+   o proximo passo e avancar */
+.vbar{position:absolute;left:0;right:0;bottom:0;height:5px;z-index:3;background:rgba(255,255,255,.14);
+  opacity:0;transition:opacity .4s}
+.vbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--yel2),var(--yel));
+  transition:width .5s linear}
+.player.meio .vbar{opacity:1}
+.rever{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;display:none;
+  border:0;border-radius:99px;padding:13px 22px;font-family:var(--fd);font-weight:800;font-size:15px;
+  background:var(--yel);color:var(--on-yel);cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.player.fim .rever{display:block}
+.player.fim::after{content:"";position:absolute;inset:0;z-index:1;
+  background:rgba(10,15,10,.72);transition:background .5s ease}
+.btn.pisca{animation:piscaBtn 1.15s ease-in-out infinite}
+/* pulsa so o brilho, sem escalar: o botao que cresce e encolhe mexe o alvo
+   do toque bem na hora em que a pessoa vai tocar nele */
+@keyframes piscaBtn{
+  0%,100%{box-shadow:0 12px 30px rgba(255,180,0,.26)}
+  50%{box-shadow:0 0 0 7px rgba(255,210,0,.22),0 14px 34px rgba(255,180,0,.45)}}
+@media (prefers-reduced-motion: reduce){ .btn.pisca{animation:none;
+  box-shadow:0 0 0 7px rgba(255,210,0,.22),0 14px 34px rgba(255,180,0,.45)} }
+
+.som-on{position:absolute;inset:0;z-index:2;border:0;padding:0;cursor:pointer;
+  background:transparent;display:flex;align-items:flex-end;justify-content:stretch}
+.som-on .faixa{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 8px;color:var(--on-yel);white-space:nowrap;
+  font-family:var(--fd);font-size:clamp(11.5px,3.2vw,14px);font-weight:600;
+  background:linear-gradient(0deg,rgba(255,210,0,.97),rgba(255,168,0,.88));
+  animation:pulsaSom 2.2s ease-in-out infinite}
+.som-on .ic{font-size:15px;line-height:1}
+@keyframes pulsaSom{0%,100%{opacity:1}50%{opacity:.78}}
+@media (prefers-reduced-motion: reduce){ .som-on{animation:none} }
+
+/* ---------- insercao ---------- */
+.insercao{background:linear-gradient(160deg,#1E1A0A,var(--card) 58%);
+  border:1.5px solid rgba(255,210,0,.42);border-radius:var(--r);padding:18px 16px;
+  display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.insercao::before{content:"";position:absolute;inset:-46% -12% auto auto;width:180px;height:180px;
+  background:radial-gradient(circle,rgba(255,210,0,.2),transparent 70%)}
+.insercao > *{position:relative}
+.insercao .dado{font-family:var(--fd);font-size:38px;font-weight:800;color:var(--yel);
+  letter-spacing:-.04em;line-height:1}
+.insercao .fonte{font-size:11.5px;color:var(--txt3)}
+/* 16/10: o +61% em figura, duas barras que sobem */
+.mg{display:flex;align-items:flex-end;justify-content:center;gap:14px;margin:6px 0 2px}
+.mg-col{display:flex;flex-direction:column;align-items:center;width:124px;gap:8px}
+.mg-col small{text-align:center;line-height:1.3}
+/* a area da barra tem altura fixa: a altura em % e sempre a proporcao certa */
+.mg-area{height:140px;width:100%;display:flex;align-items:flex-end}
+.mg-col small{font-size:12px;color:var(--txt3);font-family:var(--fd);font-weight:600}
+.mg-bar{width:100%;height:0;border-radius:12px 12px 6px 6px;display:flex;align-items:flex-start;
+  justify-content:center;padding-top:8px;transition:height 1s cubic-bezier(.22,1,.36,1);overflow:hidden}
+.mg-bar.de{background:linear-gradient(180deg,#3A4A3D,#243026)}
+.mg-bar.hoje{background:linear-gradient(180deg,#FF6B5A,#B4453A);box-shadow:0 0 26px rgba(255,107,90,.28)}
+.mg-bar span{font-family:var(--fd);font-weight:800;font-size:13px;color:var(--txt2);opacity:0;transition:opacity .4s .7s}
+.mg-bar.hoje span{font-size:18px;color:#fff}
+.mg-bar.on span{opacity:1}
+.mg-seta{align-self:center;width:54px;height:54px;color:var(--red);margin-bottom:40px;
+  filter:drop-shadow(0 0 10px rgba(255,107,90,.45));animation:setaSobe 1.6s ease-in-out infinite}
+@keyframes setaSobe{0%,100%{transform:translate(0,0)}50%{transform:translate(4px,-6px)}}
+.mg-leg{text-align:center;font-size:11.5px;color:var(--txt3);margin:0}
+@media (prefers-reduced-motion: reduce){ .mg-bar{transition:none} .mg-bar span{transition:none} .mg-seta{animation:none} }
+
+/* ---------- loading ---------- */
+.orbita{width:min(62vw,210px);margin:6px auto 0;display:block}
+.orbita .arco{transform-origin:106px 106px;animation:gira 1.5s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+.orbita .meio{font-family:var(--fd);font-weight:800;font-size:30px;fill:var(--yel)}
+@media (prefers-reduced-motion: reduce){ .orbita .arco{animation:none} }
+.load-bar{height:9px;border-radius:99px;background:#101A12;border:1px solid var(--line);
+  overflow:hidden;margin:6px 0 4px}
+.load-bar i{display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,var(--yel2),var(--yel));transition:width .4s linear}
+.load-txt{text-align:center;font-size:14px;color:var(--txt2);min-height:21px}
+
+/* ---------- resultado ---------- */
+.circs{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:2px}
+.circ{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:15px 10px;text-align:center}
+.circ svg{width:92px;height:92px;margin:0 auto;display:block;transform:rotate(-90deg)}
+.circ .anel{stroke:#1B2A1E;fill:none;stroke-width:9}
+.circ .val{stroke:url(#gy);fill:none;stroke-width:9;stroke-linecap:round;
+  stroke-dasharray:251;stroke-dashoffset:251;
+  transition:stroke-dashoffset 1.3s cubic-bezier(.22,1,.36,1)}
+.circ .n{position:relative;margin-top:-58px;font-family:var(--fd);font-size:22px;
+  font-weight:800;color:var(--yel);font-variant-numeric:tabular-nums}
+.circ p{font-size:12.5px;color:var(--txt2);margin-top:36px;line-height:1.35}
+.diag{display:flex;flex-direction:column;gap:12px}
+.d-top{position:relative;overflow:hidden;border-radius:18px;padding:18px 16px 16px;
+  border:1.5px solid rgba(255,107,90,.6);background:linear-gradient(160deg,rgba(255,107,90,.12),var(--card) 62%)}
+.d-top.n1{border-color:rgba(255,210,0,.6);background:linear-gradient(160deg,rgba(255,210,0,.10),var(--card) 62%)}
+.d-top.n2{border-color:rgba(95,207,138,.55);background:linear-gradient(160deg,rgba(95,207,138,.10),var(--card) 62%)}
+.d-top{--pulso:255,107,90}
+.d-top.n1{--pulso:255,210,0} .d-top.n2{--pulso:95,207,138}
+.d-top.on{animation:dPulsa 2.2s ease-in-out infinite}
+@keyframes dPulsa{0%,100%{box-shadow:0 0 0 0 rgba(var(--pulso),0)}
+  50%{box-shadow:0 0 0 6px rgba(var(--pulso),.10),0 0 32px rgba(var(--pulso),.22)}}
+.d-tag{font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#FF8A78}
+.d-top.n1 .d-tag{color:var(--yel)} .d-top.n2 .d-tag{color:var(--grn)}
+.d-linha{display:flex;align-items:center;gap:9px}
+.d-top .d-linha{margin-top:10px}
+.d-emo{font-size:22px;line-height:1}
+.d-nome{flex:1;min-width:0}
+.d-top .d-nome{font-family:var(--fd);font-size:20px;font-weight:700;line-height:1.15}
+.d-top .d-pct{font-family:var(--fd);font-size:42px;font-weight:800;color:#FF8A78;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;line-height:1}
+.d-top.n1 .d-pct{color:var(--yel)} .d-top.n2 .d-pct{color:var(--grn)}
+.d-barra{height:10px;border-radius:99px;background:#1B2A1E;overflow:hidden;margin-top:12px}
+.d-barra i{display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,#B4453A,#FF6B5A);transition:width 1.1s cubic-bezier(.22,1,.36,1)}
+.n1 .d-barra i{background:linear-gradient(90deg,var(--yel2),var(--yel))}
+.n2 .d-barra i{background:linear-gradient(90deg,#2E8B57,#5FCF8A)}
+.d-frase{margin:12px 0 0;font-size:15px;line-height:1.5;color:var(--txt2)}
+.d-frase b{color:var(--txt)}
+.d-outros{display:flex;flex-direction:column;gap:14px;background:var(--card);border:1px solid var(--line);
+  border-radius:16px;padding:15px 14px}
+.d-it .d-nome{font-size:14.5px;font-weight:600;color:var(--txt)}
+.d-it b{font-family:var(--fd);font-size:17px;min-width:44px;text-align:right;font-variant-numeric:tabular-nums}
+.d-it.n0 b{color:#FF8A78} .d-it.n1 b{color:var(--yel)} .d-it.n2 b{color:var(--grn)}
+.d-it .d-barra{height:7px;margin-top:8px}
+.chip{font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 8px;border-radius:99px;white-space:nowrap}
+.n0 .chip{background:rgba(255,107,90,.16);color:#FF8A78}
+.n1 .chip{background:rgba(255,210,0,.14);color:var(--yel)}
+.n2 .chip{background:rgba(95,207,138,.15);color:var(--grn)}
+.d-curta{margin:6px 0 0;font-size:13px;color:var(--txt3)}
+.d-nota{font-size:11.5px;color:var(--txt3);text-align:center;margin:0}
+@media (prefers-reduced-motion: reduce){ .d-top.on{animation:none} .d-barra i{transition:none} }
+.nivel{border-left:3px solid var(--yel);border-radius:0 14px 14px 0;
+  background:linear-gradient(100deg,var(--yel-soft),transparent);
+  padding:15px 16px;font-size:15px;font-weight:700;color:var(--txt)}
+
+/* ---------- listas ---------- */
+.lista{display:flex;flex-direction:column;gap:0;padding:0;margin:0}
+.lista li{list-style:none;display:flex;gap:11px;align-items:flex-start;
+  padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px;color:var(--txt2)}
+.lista li:last-child{border:0;padding-bottom:0}
+.lista li i{font-style:normal;flex:0 0 auto;width:23px;height:23px;border-radius:50%;
+  background:rgba(95,207,138,.15);color:var(--grn);display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:800}
+.lista.dor li i{background:rgba(255,107,90,.14);color:var(--red)}
+.caixa{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:16px;display:flex;flex-direction:column;gap:10px}
+.ab{display:grid;gap:11px}
+.ab .lb{border-radius:16px;padding:16px;border:1px solid var(--line);background:var(--card)}
+.ab .lb.ruim{border-color:rgba(255,107,90,.3);background:linear-gradient(160deg,rgba(255,107,90,.06),var(--card))}
+.ab .lb.bom{border-color:rgba(95,207,138,.34);background:linear-gradient(160deg,rgba(95,207,138,.06),var(--card))}
+.ab h4{font-family:var(--fd);font-size:12px;letter-spacing:.11em;text-transform:uppercase;margin-bottom:11px}
+.ab .ruim h4{color:var(--red)} .ab .bom h4{color:var(--grn)}
+
+/* ---------- formulario ---------- */
+.campo{margin-top:13px}
+.campo label{display:block;font-family:var(--fd);font-size:11.5px;font-weight:600;
+  letter-spacing:.1em;color:var(--txt2);margin-bottom:7px;text-transform:uppercase}
+.campo input{width:100%;padding:17px 15px;border-radius:14px;background:var(--card);
+  border:1.5px solid var(--line);font-size:16px;transition:.2s}
+.campo input:focus{outline:0;border-color:var(--yel);background:var(--card2);
+  box-shadow:0 0 0 4px rgba(255,210,0,.12)}
+.campo.erro input{border-color:var(--red)}
+.campo .msg{color:var(--red);font-size:12px;margin-top:6px;display:none}
+.campo.erro .msg{display:block}
+.cadeado{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:13px;
+  border-radius:14px;background:#101A12;border:1px dashed var(--line2);
+  color:var(--txt2);font-size:12.5px}
+.cadeado b{color:var(--yel)}
+.privacidade{color:var(--txt3);font-size:11.5px;margin-top:12px;text-align:center}
+
+/* ---------- funil e 9 pilares ---------- */
+.funil{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.funil svg{width:100%;height:auto;display:block}
+.etapa{display:flex;gap:12px;align-items:flex-start;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:13px 14px;
+  transition:border-color .3s,background .3s,transform .3s}
+.etapa.on{border-color:rgba(255,210,0,.55);background:var(--card2)}
+.etapa .marca{flex:0 0 auto;width:10px;height:10px;border-radius:50%;margin-top:6px;
+  background:var(--line2);transition:background .3s,box-shadow .3s}
+.etapa.on .marca{background:var(--yel);box-shadow:0 0 0 4px rgba(255,210,0,.16)}
+.etapa b{display:block;font-family:var(--fd);font-size:15px;font-weight:600;letter-spacing:-.02em}
+.etapa i{display:block;font-style:normal;color:var(--yel);font-size:12.5px;font-weight:700;margin:3px 0 4px}
+.etapa span{color:var(--txt2);font-size:13.5px;line-height:1.5}
+.pil-i{display:flex;gap:13px;align-items:flex-start;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:15px 16px;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .5s ease,transform .5s cubic-bezier(.16,1,.3,1),border-color .3s}
+.pil-i.vis{opacity:1;transform:none}
+.pil-i.on{border-color:rgba(255,210,0,.5)}
+.pil-n{flex:0 0 auto;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+  font-family:var(--fd);font-weight:800;font-size:14px;color:var(--on-yel);
+  background:linear-gradient(180deg,var(--yel),var(--yel2));
+  font-variant-numeric:tabular-nums;transition:transform .3s}
+.pil-i.on .pil-n{transform:scale(1.12)}
+.pil-tx b{display:block;font-family:var(--fd);font-size:15px;font-weight:600;
+  letter-spacing:-.02em;margin-bottom:3px}
+.pil-tx i{display:block;font-style:normal;color:var(--yel);font-size:12.5px;font-weight:700;margin-bottom:6px}
+.pil-tx span{color:var(--txt2);font-size:13.5px;line-height:1.5}
+@media (prefers-reduced-motion: reduce){
+  .pil-i{opacity:1;transform:none;transition:none}
+  .etapa,.etapa .marca,.pil-n{transition:none}
+}
+
+/* ---------- o jogo dos presentes ---------- */
+/* o cofre nao e mais uma barra propria: e um grupo na direita do topo.
+   Sem sticky nem fundo, porque quem e sticky agora e o #topo inteiro. */
+#cofre{display:flex;align-items:center;gap:7px;min-width:0;margin-left:auto;
+  padding-left:9px;border-left:1px solid var(--line)}
+/* o rotulo e a primeira coisa a ceder se a tela for estreita demais */
+.gt-lb{font-family:var(--fd);font-size:9.5px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--txt3);white-space:nowrap;
+  overflow:hidden;text-overflow:clip;min-width:0}
+.gt-slots{display:flex;gap:4px;flex:0 0 auto}
+.gt-s{width:18px;height:18px;border-radius:6px;border:1px dashed var(--line2);
+  display:grid;place-items:center;font-size:9.5px;color:var(--txt3);
+  transition:transform .3s,background .3s,border-color .3s}
+.gt-s.on{border:1px solid var(--yel);border-style:solid;color:var(--on-yel);
+  background:linear-gradient(180deg,var(--yel),var(--yel2))}
+.gt-s.pop{animation:pop .5s cubic-bezier(.16,1,.3,1)}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.45) rotate(-8deg)}100%{transform:scale(1)}}
+.gt-n{font-family:var(--fd);font-size:11px;color:var(--yel);font-variant-numeric:tabular-nums;flex:0 0 auto}
+.gt-b{background:0;border:0;padding:4px;font-size:15px;cursor:pointer;flex:0 0 auto;line-height:1}
+
+.caixa-p{width:min(64vw,210px);margin:4px auto 0;display:block;cursor:pointer;
+  background:0;border:0;padding:0;animation:flutua 3.4s ease-in-out infinite}
+@keyframes flutua{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.caixa-p.treme{animation:treme .5s ease-in-out}
+@keyframes treme{0%,100%{transform:rotate(0)}20%{transform:rotate(-7deg)}40%{transform:rotate(7deg)}
+  60%{transform:rotate(-5deg)}80%{transform:rotate(4deg)}}
+.caixa-p svg{width:100%;height:auto;display:block;filter:drop-shadow(0 16px 34px rgba(255,180,0,.3))}
+.toque{text-align:center;font-family:var(--fd);font-size:14px;letter-spacing:.14em;font-weight:700;
+  text-transform:uppercase;color:var(--yel);animation:pisca 1.6s infinite}
+.p-card{background:linear-gradient(160deg,#1E1A0A,var(--card) 56%);
+  border:1.5px solid rgba(255,210,0,.5);border-radius:var(--r);padding:18px 16px;
+  display:flex;flex-direction:column;gap:9px;position:relative;overflow:hidden;
+  animation:sobe .5s cubic-bezier(.16,1,.3,1) both}
+@keyframes sobe{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.p-card::before{content:"";position:absolute;inset:-40% -10% auto auto;width:180px;height:180px;
+  background:radial-gradient(circle,rgba(255,210,0,.24),transparent 70%)}
+.p-card > *{position:relative}
+.p-card .ico{font-size:34px;line-height:1}
+.p-card .porque{margin:0;color:var(--txt);font-size:14.5px;line-height:1.45;border-left:3px solid var(--yel);padding-left:10px}
+.p-card .val{font-family:var(--fd);font-size:26px;font-weight:800;color:var(--yel);letter-spacing:-.03em}
+.p-card .val s{color:var(--txt3);font-size:15px;font-weight:500;margin-right:8px}
+.p-guardado{display:flex;gap:9px;align-items:flex-start;padding:12px;border-radius:12px;
+  background:#101A12;border:1px dashed var(--line2);color:var(--txt2);font-size:12.5px}
+.p-guardado b{color:var(--yel)}
+#confete{position:fixed;inset:0;pointer-events:none;z-index:45}
+
+#modal{position:fixed;inset:0;z-index:60;background:rgba(5,8,5,.82);
+  display:flex;align-items:center;justify-content:center;padding:18px;
+  opacity:0;pointer-events:none;transition:opacity .25s}
+#modal.on{opacity:1;pointer-events:auto}
+#modal .cx{background:var(--card);border:1px solid var(--line2);border-radius:var(--r);
+  padding:20px 18px;max-width:420px;width:100%;max-height:82vh;overflow:auto;
+  display:flex;flex-direction:column;gap:12px}
+@media (prefers-reduced-motion: reduce){
+  .caixa-p,.toque,.gt-s.pop,.p-card{animation:none}
+}
+
+.timer{display:flex;align-items:center;justify-content:center;gap:10px;
+  background:linear-gradient(100deg,rgba(255,210,0,.14),transparent);
+  border:1px solid rgba(255,210,0,.42);border-radius:14px;padding:12px 14px}
+.timer .lb{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--txt2)}
+.timer .rl{font-family:var(--fd);font-size:26px;font-weight:800;color:var(--yel);
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.off{display:inline-flex;align-self:center;align-items:center;gap:6px;
+  background:linear-gradient(100deg,var(--yel),var(--yel2));color:var(--on-yel);
+  border-radius:99px;padding:5px 13px;font-family:var(--fd);font-size:12px;
+  font-weight:800;letter-spacing:.04em}
+
+.roda{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+  background:var(--card);transition:transform .25s,border-color .25s}
+.roda:hover{transform:translateY(-4px);border-color:rgba(255,210,0,.5)}
+.roda svg{width:100%;height:auto;display:block;background:#0D140E}
+.roda-pe{padding:15px}
+.roda-pe b{display:block;font-family:var(--fd);font-size:15.5px;font-weight:600;
+  letter-spacing:-.02em;margin-bottom:4px}
+.roda-pe span{color:var(--txt2);font-size:13.5px}
+/* a linha amarela corre a roda inteira: o arco e um traco de 330 num
+   perimetro de 716, entao girando o grupo ele passa por todos os nove */
+.orbita-pil{transform-origin:170px 158px;animation:giraPil 9s linear infinite}
+@keyframes giraPil{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){ .orbita-pil{animation:none} }
+
+/* ---------- pagina final: o ritmo da referencia ---------- */
+.sec{padding-block:26px;border-bottom:1px solid var(--line);
+  display:flex;flex-direction:column;gap:12px;
+  opacity:0;transform:translateY(18px);
+  transition:opacity .55s ease,transform .55s cubic-bezier(.16,1,.3,1)}
+.sec.in{opacity:1;transform:none}
+.sec:last-of-type{border-bottom:0}
+.sec.meio{text-align:center;align-items:center}
+.kick{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--yel)}
+.sh{font-family:var(--fd);font-weight:600;letter-spacing:-.03em;line-height:1.15;
+  font-size:clamp(20px,5.4vw,28px)}
+.sp{color:var(--txt2);font-size:15px}
+.legal{padding-top:22px;color:var(--txt3);font-size:11.5px;text-align:center;
+  display:flex;flex-direction:column;gap:6px}
+
+/* comparativo em barras que contam de zero */
+/* comparativo linha a linha: de um lado a landing de sempre, do outro o
+   funil de quiz. Duas colunas com uma barra so nao comparava nada. */
+.cmp{display:flex;flex-direction:column;gap:10px}
+.cmp-l{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:14px 15px;display:flex;flex-direction:column;gap:10px}
+.cmp-l > .t{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--yel)}
+.cmp-base{font-size:11.5px;color:var(--txt3);margin-top:-4px}
+.cmp-b{display:grid;grid-template-columns:96px 1fr 62px;align-items:center;gap:9px}
+.cmp-r{font-family:var(--fd);font-size:11px;font-weight:600;color:var(--txt3)}
+.cmp-t{height:9px;border-radius:99px;background:#101A12;
+  border:1px solid var(--line);overflow:hidden;display:block}
+/* a barra cresce do zero quando o bloco entra na tela, e o numero sobe
+   junto: parada no valor final ela nao diz nada */
+.cmp-t i{display:block;height:100%;width:0;border-radius:99px;
+  transition:width 1.15s cubic-bezier(.22,1,.36,1)}
+/* a menor barra do bloco tem 4%: sem um minimo ela vira um pontinho e
+   parece defeito, nao numero baixo */
+.cmp-t i[data-pct]{min-width:0}
+.cmp-b .cmp-t i:not([style*="width: 0"]){min-width:14px}
+.cmp-b.hoje .cmp-t i{background:linear-gradient(90deg,#8E3A31,#B4453A)}
+.cmp-b.quiz .cmp-t i{background:linear-gradient(90deg,var(--yel2),var(--yel))}
+.cmp-v{display:flex;flex-direction:column;line-height:1.15;text-align:right}
+.cmp-v b{font-family:var(--fd);font-size:13.5px;font-variant-numeric:tabular-nums}
+.cmp-b.hoje .cmp-v b{color:#D0695E}
+.cmp-b.quiz .cmp-v b{color:var(--yel)}
+.cmp-v span{font-size:10px;color:var(--txt3)}
+@media(max-width:359px){ .cmp-b{grid-template-columns:80px 1fr 54px;gap:7px} }
+.lado b{font-family:var(--fd);font-size:10px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase}
+.lado.hoje b{color:var(--red)} .lado.quiz b{color:var(--yel)}
+.lado span{font-size:13.5px;color:var(--txt2);line-height:1.5}
+.lado.quiz span{color:var(--txt)}
+
+/* grafico de projecao */
+.chart{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px 12px 8px}
+.chart svg{width:100%;height:auto;display:block}
+
+/* antes x depois com a seta no meio */
+.ba{display:grid;grid-template-columns:1fr auto 1fr;gap:9px;align-items:center}
+.ba-c{border-radius:16px;border:1px solid var(--line);background:var(--card);padding:15px 12px;
+  display:flex;flex-direction:column;gap:8px;text-align:center;min-width:0}
+.ba-c.ruim{border-color:rgba(255,107,90,.34);background:linear-gradient(160deg,rgba(255,107,90,.07),var(--card))}
+.ba-c.bom{border-color:rgba(255,210,0,.45);background:linear-gradient(160deg,rgba(255,210,0,.09),var(--card))}
+.ba-c .ico{font-size:30px;line-height:1}
+.ba-c .lb{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+.ba-c.ruim .lb{color:var(--red)} .ba-c.bom .lb{color:var(--yel)}
+.ba-c small{color:var(--txt2);font-size:12.5px;line-height:1.4}
+.ba-seta{color:var(--yel);font-size:22px;font-family:var(--fd)}
+
+/* capacidades */
+.checks{display:flex;flex-direction:column;gap:0;margin:0;padding:0}
+.checks li{list-style:none;display:flex;gap:11px;align-items:flex-start;
+  padding:12px 0;border-bottom:1px solid var(--line);font-size:14.5px;color:var(--txt2)}
+.checks li:last-child{border:0}
+.checks li i{font-style:normal;flex:0 0 auto;width:24px;height:24px;border-radius:50%;
+  background:rgba(255,210,0,.16);color:var(--yel);display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:800}
+
+/* stack com valor somado */
+.stack{display:flex;flex-direction:column;gap:9px}
+.st-i{display:flex;gap:12px;align-items:flex-start;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:14px}
+.st-i.principal{border-color:rgba(255,210,0,.5);
+  background:linear-gradient(160deg,rgba(255,210,0,.09),var(--card) 60%)}
+.st-i .ico{font-size:24px;line-height:1;flex:0 0 auto}
+.st-i .tx{flex:1;min-width:0}
+.st-i .tx b{display:block;font-family:var(--fd);font-size:14.5px;font-weight:600}
+.st-i .tx span{font-size:13px;color:var(--txt2);line-height:1.45}
+.st-i .pr{flex:0 0 auto;text-align:right;display:flex;flex-direction:column;gap:2px}
+.st-i .pr s{color:var(--txt3);font-size:12.5px}
+.st-i .pr em{font-style:normal;font-family:var(--fd);font-size:10px;font-weight:600;
+  letter-spacing:.1em;color:var(--yel)}
+.total{margin-top:14px;text-align:center;display:flex;flex-direction:column;gap:4px}
+.total .t1{color:var(--txt2);font-size:13.5px}
+.total .t2{font-family:var(--fd);font-size:30px;font-weight:800;color:var(--txt);
+  text-decoration:line-through;text-decoration-color:var(--red);letter-spacing:-.03em}
+.total .t3{color:var(--txt2);font-size:13.5px}
+.ilustra{color:var(--txt3);font-size:11px;text-align:center}
+@media (prefers-reduced-motion: reduce){
+  .sec{opacity:1;transform:none;transition:none}
+  .cmp-t i{transition:none}
+}
+
+/* ---------- oferta ---------- */
+.preco{display:flex;flex-direction:column;align-items:center;gap:4px;
+  background:var(--card);border:1.5px solid rgba(255,210,0,.45);border-radius:var(--r);
+  padding:20px 16px;text-align:center}
+.preco .de{color:var(--txt3);font-size:14px;text-decoration:line-through}
+/* 16/10: a caixa de preco em destaque, com a logo e o botao */
+.preco-destaque{position:relative;gap:9px;padding:24px 18px 20px;overflow:hidden;
+  border:2px solid var(--yel);
+  background:radial-gradient(120% 80% at 50% 0%,rgba(255,210,0,.16),transparent 60%),var(--card);
+  animation:brilha 2.4s ease-in-out infinite}
+@keyframes brilha{0%,100%{box-shadow:0 0 26px rgba(255,210,0,.18)}
+  50%{box-shadow:0 0 0 6px rgba(255,210,0,.08),0 0 46px rgba(255,210,0,.36)}}
+.preco-destaque .logo-mini{width:92px;height:92px;border-radius:50%;margin:0 auto 2px;
+  box-shadow:0 0 0 3px rgba(255,210,0,.5),0 0 34px rgba(255,210,0,.35)}
+.preco-destaque .prod{font-family:var(--fd);font-size:12px;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--txt)}
+.preco-destaque .de-por{color:var(--txt2);font-size:14px}
+.preco-destaque .de-por s{color:var(--txt3)}
+.preco-destaque .por{font-size:clamp(46px,14vw,60px);line-height:1;text-shadow:0 0 28px rgba(255,210,0,.35)}
+.preco-destaque .por small{font-size:.42em;font-weight:700;vertical-align:.95em;margin-right:4px}
+.preco-destaque .btn-preco{width:100%;margin-top:6px;font-size:17px;font-weight:800;padding:17px 16px}
+.preco-destaque .seguro{font-size:12px;color:var(--txt3)}
+@media (prefers-reduced-motion: reduce){ .preco-destaque{animation:none} }
+/* prova do case: foto e numero grande */
+.prova-foto{margin:0;border-radius:16px;overflow:hidden;border:1px solid rgba(255,210,0,.35)}
+.prova-foto img{display:block;width:100%;height:auto;aspect-ratio:1000/667;object-fit:cover}
+.prova-num .destaque b{font-family:var(--fd);font-size:clamp(34px,10vw,44px);font-weight:800;
+  color:var(--yel);letter-spacing:-.03em;line-height:1.05;display:block}
+.prova-num b{font-family:var(--fd);font-size:26px;color:var(--yel)}
+.prova-num .fonte-num{font-size:11.5px;color:var(--txt3)}
+.preco .por{font-family:var(--fd);font-size:40px;font-weight:800;color:var(--yel);letter-spacing:-.04em}
+.preco .par{font-size:14px;color:var(--txt2)}
+.bonus{background:linear-gradient(160deg,#1E1A0A,var(--card) 55%);
+  border:1.5px solid rgba(255,210,0,.5);border-radius:var(--r);padding:17px 16px;
+  display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
+.bonus::before{content:"";position:absolute;inset:-40% -10% auto auto;width:180px;height:180px;
+  background:radial-gradient(circle,rgba(255,210,0,.22),transparent 70%)}
+.bonus > *{position:relative}
+.bonus .it b{display:block;font-family:var(--fd);font-size:15px;font-weight:600}
+.bonus .it span{font-size:13.5px;color:var(--txt2)}
+.garantia{display:flex;gap:12px;align-items:flex-start;background:var(--card);
+  border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.garantia .selo-g{flex:0 0 auto;width:46px;height:46px;border-radius:50%;
+  border:2px solid var(--yel);color:var(--yel);display:grid;place-items:center;
+  font-family:var(--fd);font-weight:800;font-size:15px;line-height:1;text-align:center}
+#fixo{position:fixed;left:0;right:0;bottom:0;z-index:40;
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));
+  background:rgba(10,15,10,.94);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line)}
+#fixo .in{max-width:560px;margin:0 auto}
+.rodape-legal{color:var(--txt3);font-size:11.5px;text-align:center;padding-top:8px}
+
+#toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(20px);
+  background:var(--card2);border:1px solid var(--line2);border-radius:12px;
+  padding:11px 16px;font-size:13.5px;opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;z-index:50;max-width:88vw;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- Rede de fundo (A Revolução do Quiz) ----------
+   Pedido da reunião de 02/10: cara de revolução, com tecnologia e IA. Fica
+   ATRÁS de tudo com z-index -1, que pinta acima do fundo do body e abaixo de
+   qualquer conteúdo, sem precisar mexer no empilhamento do resto da página. */
+.rede{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.55}
+@media (max-width:560px){.rede{opacity:.42}}
+
+/* ---------- headline da capa em três tempos ---------- */
+h1.hl{font-size:inherit}
+h1.hl span{display:block;text-wrap:balance}
+h1.hl .hl-a{font-size:clamp(19px,5vw,24px);font-weight:600;color:var(--txt2);letter-spacing:-.02em}
+h1.hl .hl-b{font-size:clamp(27px,7.2vw,36px);font-weight:800;margin-top:4px;line-height:1.08}
+h1.hl .hl-c{font-size:clamp(20px,5.4vw,26px);font-weight:700;margin-top:10px;line-height:1.2}
+/* ABERTURA DA VERSAO CASE. Tudo centralizado. A foto ja vem com o fundo
+   verde da pagina e a linha dourada; ela so funde embaixo, onde encosta no
+   texto. Ocupa a largura toda no celular. */
+.abertura{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px}
+.hero-case{margin:-20px -16px 0;width:calc(100% + 32px);overflow:hidden}
+.hero-case img{display:block;width:100%;height:auto;aspect-ratio:1000/667;object-fit:cover;
+  -webkit-mask-image:linear-gradient(180deg,#000 70%,transparent 100%);
+          mask-image:linear-gradient(180deg,#000 70%,transparent 100%)}
+.abertura .marca{margin-top:-18px;font-family:var(--fd);font-size:11px;font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--yel)}
+.abertura h1.hl{margin:0;width:100%}
+/* a linha grande quebra sozinha em duas; a de baixo precisa de coluna mais
+   larga, senao vira cinco linhas curtas */
+.abertura h1.hl .hl-b{display:block;max-width:12ch;margin-left:auto;margin-right:auto}
+.abertura h1.hl .hl-c{display:block;max-width:26ch;margin-left:auto;margin-right:auto}
+.abertura h1.hl.sem-a .hl-b{font-size:clamp(30px,8.4vw,42px)}
+.abertura h1.hl.sem-a .hl-b{margin-top:0}
+.abertura h1.hl.sem-a .hl-c{font-size:clamp(18px,4.9vw,22px);line-height:1.3;margin-top:8px;
+  font-weight:600;color:var(--txt2)}
+.abertura .peq{max-width:34ch;margin:0}
+/* o botao e o unico caminho: grande, com a seta empurrando pra frente */
+.btn-abre{display:flex;align-items:center;justify-content:center;gap:10px;
+  max-width:420px;padding:19px 18px;font-size:17px;font-weight:800;margin-top:6px}
+.btn-abre .seta{width:22px;height:22px;flex:0 0 auto;animation:empurra 1.3s ease-in-out infinite}
+@keyframes empurra{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+@media (prefers-reduced-motion: reduce){ .btn-abre .seta{animation:none} }
+/* no desktop a foto nao encosta na borda da tela: as quatro beiradas somem no
+   fundo, senao aparece um retangulo escuro em volta das duas pessoas */
+@media (min-width:600px){
+  .hero-case{margin:0;width:100%}
+  .hero-case img{
+    -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 12%,#000 70%,transparent 100%),
+                       linear-gradient(90deg,transparent 0,#000 16%,#000 84%,transparent 100%);
+    -webkit-mask-composite:source-in;
+            mask-image:linear-gradient(180deg,transparent 0,#000 12%,#000 70%,transparent 100%),
+                       linear-gradient(90deg,transparent 0,#000 16%,#000 84%,transparent 100%);
+            mask-composite:intersect}
+}
+/* CAPA DIRETO (16/10): tudo na primeira dobra, centralizado como a abertura
+   do case. As fotos dos cartoes encolhem com a altura da tela (svh), e o
+   espaco entre os blocos tambem: num celular baixo o texto nao pode empurrar
+   os cartoes para fora da tela. */
+.capa-direto{display:flex;flex-direction:column;align-items:center;text-align:center;
+  gap:clamp(8px,1.6svh,14px)}
+.capa-direto .marca{font-family:var(--fd);font-size:11px;font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--yel)}
+.capa-direto h1.hl{margin:0;width:100%}
+.capa-direto h1.hl .hl-b{max-width:13ch;margin:0 auto;font-size:clamp(26px,min(7.6vw,4.4svh),38px)}
+.capa-direto h1.hl .hl-c{max-width:28ch;margin:6px auto 0;font-size:clamp(16px,min(4.6vw,2.6svh),21px);
+  line-height:1.3;font-weight:600;color:var(--txt2)}
+.capa-direto .peq{max-width:36ch;margin:0;font-size:clamp(13px,min(3.7vw,2.1svh),15px);line-height:1.5}
+.capa-direto .pergunta{margin:clamp(2px,.8svh,8px) 0 0;font-family:var(--fd);font-weight:700;
+  font-size:clamp(17px,min(4.8vw,2.7svh),21px);color:var(--txt)}
+#tela:has(.capa-direto){gap:clamp(10px,1.8svh,16px)}
+.capa-direto ~ .fotos .fcard{padding:10px 8px;gap:6px}
+.capa-direto ~ .fotos .fcard .ret{aspect-ratio:auto;height:clamp(78px,17svh,170px)}
+/* BIFURCACAO E AGENDA (16/10) */
+.bif{display:flex;flex-direction:column;gap:12px;text-align:center;align-items:stretch}
+.bif h2{margin:0}
+.marca-bif{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--yel)}
+.bif-op{display:flex;flex-direction:column;gap:6px;text-align:left;padding:16px 15px;border-radius:16px;
+  border:1.5px solid var(--line);background:var(--card);color:var(--txt);cursor:pointer;font:inherit}
+.bif-op b{font-size:16px;font-weight:800}
+.bif-op span{font-size:13.5px;color:var(--txt2);line-height:1.45}
+.bif-op i{font-style:normal;font-size:13px;font-weight:700;color:var(--yel)}
+.bif-op.dest{border-color:var(--yel);background:linear-gradient(160deg,rgba(255,210,0,.12),var(--card) 62%)}
+@media (hover:hover) and (pointer:fine){ .bif-op:hover{border-color:rgba(255,210,0,.75)} }
+.bif-op:focus-visible,.dia:focus-visible,.hora:focus-visible,.link-metodo:focus-visible{outline:2px solid var(--yel);outline-offset:3px}
+.link-metodo{background:none;border:0;color:var(--txt3);font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;padding:8px}
+a.btn{display:block;text-align:center;text-decoration:none}
+.bif-link{padding:22px 0 6px;text-align:center}
+.bif-link button{background:none;border:0;color:var(--txt2);font:inherit;font-size:14px;cursor:pointer;line-height:1.5}
+.bif-link u{color:var(--yel)}
+.agenda{display:flex;flex-direction:column;gap:10px;text-align:left}
+.agenda .aviso{color:var(--yel);text-align:center}
+.dias{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.dia{flex:0 0 auto;padding:9px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--txt);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.dia.on{border-color:var(--yel);color:var(--yel)}
+.horas{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px}
+.hora{padding:11px 0;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--txt);font:inherit;font-size:14px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums}
+.hora.on{background:linear-gradient(100deg,var(--yel),var(--yel2));color:var(--on-yel);border-color:var(--yel)}
+.btn:disabled{opacity:.5;cursor:default}
+.ok-agenda{width:58px;height:58px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-size:28px;font-weight:800;
+  background:linear-gradient(100deg,var(--yel),var(--yel2));color:var(--on-yel)}
+/* a pergunta de homem ou mulher, sozinha na tela seguinte */
+.so-pergunta{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;margin:6px 0 4px}
+</style>
+</head>
+<body>
+
+<header id="topo">
+  <div class="topo-in">
+    <button id="voltar" type="button" aria-label="Voltar">&#8592;</button>
+    <div id="cofre">
+      <span class="gt-lb">Seus presentes</span>
+      <div class="gt-slots" id="gtSlots"></div>
+      <span class="gt-n" id="gtN">0/4</span>
+      <button class="gt-b" id="gtCofre" type="button" aria-label="Ver o meu cofre">&#127873;</button>
+      <button class="gt-b" id="gtSom" type="button" aria-label="Ligar ou desligar o som">&#128266;</button>
+    </div>
+  </div>
+  <div class="barra"><i id="prog"></i></div>
+</header>
+
+<main class="wrap"><div id="tela"></div><div id="videos" class="hide"></div></main>
+<canvas id="confete" aria-hidden="true"></canvas>
+<div id="modal" role="dialog" aria-modal="true"><div class="cx" id="modalCx"></div></div>
+<div id="fixo" class="hide"><div class="in"><button class="btn" id="btnFixo" type="button"></button></div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="gy" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#FFD200"/><stop offset="1" stop-color="#FFA800"/>
+  </linearGradient>
+</defs></svg>
+
+<script>
+(function(){
+"use strict";
+var CFG = window.CFG || {};
+var ok = function(v){ return v && v !== 'TODO'; };
+
+/* =====================================================================
+   1. ESTADO, UTM E RASTREAMENTO
+   ===================================================================== */
+var state = { idx:0, flow:[], resp:{}, multi:{}, progMax:0, nome:'', email:'', whats:'', score:null };
+
+function uid(){ return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2,9); }
+var SESSION = (function(){
+  try { var s = sessionStorage.getItem('qq_sid'); if (!s) { s = uid(); sessionStorage.setItem('qq_sid', s); } return s; }
+  catch(e){ return uid(); }
+})();
+
+var UTM = (function(){
+  var out = {};
+  try {
+    var p = new URLSearchParams(location.search);
+    ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','fbclid'].forEach(function(k){
+      var v = p.get(k); if (v) out[k] = v;
+    });
+    var guardado = localStorage.getItem('qq_utm');
+    if (!Object.keys(out).length && guardado) out = JSON.parse(guardado);
+    else if (Object.keys(out).length) localStorage.setItem('qq_utm', JSON.stringify(out));
+  } catch(e){}
+  return out;
+})();
+
+/* o _fbc do Pixel: quando nao existe cookie, monta a partir do fbclid da URL */
+function fbc(){
+  try {
+    var m = document.cookie.match(/_fbc=([^;]+)/);
+    if (m) return m[1];
+    if (UTM.fbclid) return 'fb.1.' + Date.now() + '.' + UTM.fbclid;
+  } catch(e){}
+  return '';
+}
+
+if (ok(CFG.META_PIXEL_ID)) {
+  (function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)})
+  (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  /* 16/10: sem a configuracao automatica da Meta. Ligada, ela transforma cada
+     toque em botao em evento (SubscribedButtonClick, 43 num percurso) e pode
+     "adivinhar" Lead pelo texto do botao. Os eventos do funil sao so os nossos. */
+  window.fbq('set', 'autoConfig', false, CFG.META_PIXEL_ID);
+  window.fbq('init', CFG.META_PIXEL_ID);
+}
+
+/* os unicos eventos que chegam ao Pixel (o resto fica so na analise interna) */
+var PIXEL_EVENTOS = { PageView:1, QuizStart:1, ViewContent:1, Lead:1, InitiateCheckout:1, Purchase:1,
+  /* 16/10, bifurcação: escolheu a implementação e marcou a call */
+  EscolheuImplementacao:1, Schedule:1 };
+
+/* Um event_id por evento, o MESMO no navegador e no servidor. E ele que
+   permite a Meta deduplicar Pixel e CAPI em vez de contar duas vezes. */
+function track(evento, dados){
+  var d = dados || {};
+  var eid = uid();
+  var corpo = {
+    event: evento, event_id: eid, variant: CFG.VARIANT, session: SESSION,
+    ts: new Date().toISOString(), url: location.href,
+    utm: UTM, fbc: fbc(), dados: d
+  };
+  if (CFG.DEBUG) try { console.log('[track]', evento, corpo); } catch(e){}
+  /* 16/10: para o Pixel vao so os eventos do funil, e cada um uma vez. Antes
+     cada resposta, video e presente virava evento (cerca de 30 por pessoa), o
+     PageView ia como evento personalizado e o Lead levava nome, e-mail,
+     WhatsApp e as respostas em texto aberto. Dado pessoal so vai pela
+     correspondencia avancada (fbq init com em/ph), que o Pixel criptografa. */
+  if (window.fbq && ok(CFG.META_PIXEL_ID) && PIXEL_EVENTOS[evento]) {
+    var padrao = { PageView:1, Lead:1, Purchase:1, InitiateCheckout:1, ViewContent:1, CompleteRegistration:1, Schedule:1 };
+    var seguro = {};
+    ['nivel','segmento','tela','tipo','versao'].forEach(function(k){ if (d[k] !== undefined) seguro[k] = d[k]; });
+    if (evento === 'Lead' || evento === 'InitiateCheckout' || evento === 'ViewContent') {
+      seguro.content_name = 'Revolução do Quiz';
+      seguro.currency = 'BRL';
+      seguro.value = CFG.PRECO_NUM;
+    }
+    try {
+      if (evento === 'PageView') window.fbq('track', 'PageView', {}, { eventID: eid });
+      else window.fbq(padrao[evento] ? 'track' : 'trackCustom', evento, seguro, { eventID: eid });
+    } catch(e){}
+  }
+  [CFG.N8N_WEBHOOK_URL, CFG.ANALYTICS_URL].forEach(function(url){
+    if (!ok(url)) return;
+    try {
+      var s = JSON.stringify(corpo);
+      if (navigator.sendBeacon) navigator.sendBeacon(url, new Blob([s], {type:'application/json'}));
+      else fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:s, keepalive:true });
+    } catch(e){}
+  });
+}
+
+/* =====================================================================
+   2. AREAS E PERGUNTAS
+   ===================================================================== */
+var AREAS = {
+  trafego:     { nome:'Custo da captação',      emoji:'💸', questions:[6,7,8] },
+  mesa:        { nome:'Cliente deixado na mesa', emoji:'🪑', questions:[9,10,22] },
+  qualificacao:{ nome:'Qualificação do lead',    emoji:'🔍', questions:[12,14,16,17,18] },
+  execucao:    { nome:'Execução',                emoji:'🧩', questions:[13,15,19,20,21,23] }
+};
+var AREA_KEYS = ['trafego','mesa','qualificacao','execucao'];
+
+/* perguntas em que a PRIMEIRA opcao e a resposta saudavel, nao a grave */
+var INVERTED = new Set([7,15,16,20,21,22]);
+/* perguntas de multipla escolha: pontuam pela quantidade marcada */
+var MULTI = new Set([9,19]);
+
+var AREA_LABELS = {
+  trafego:     [[70,'Cada lead sai caro'], [40,'Pesado'],        [0,'Sob controle']],
+  mesa:        [[70,'Muito'],             [40,'Bastante'],      [0,'Pouco']],
+  qualificacao:[[70,'Lead cru'],          [40,'Irregular'],      [0,'Filtrado']],
+  execucao:    [[70,'Travado'],           [40,'Começa e para'],  [0,'Anda']]
+};
+/* 16/10: o diagnostico em linguagem simples. Tres faixas: 70 ou mais e
+   critico, 40 a 69 e atencao, abaixo disso esta sob controle. */
+var NIVEL_DIAG = ['Crítico', 'Atenção', 'Sob controle'];
+function nivelDiag(v){ return v >= 70 ? 0 : (v >= 40 ? 1 : 2); }
+var DIAG_FRASE = {
+  trafego:      ['Cada lead está saindo caro',     'O custo pesa na conta',          'O custo está sob controle'],
+  mesa:         ['Muita gente boa está escapando', 'Parte dos bons clientes escapa', 'Pouca gente boa escapa'],
+  qualificacao: ['O lead chega sem estar pronto',  'A qualidade do lead varia',      'O lead chega filtrado'],
+  execucao:     ['A estrutura não sai do papel',   'A execução ainda trava',         'A execução anda']
+};
+var DIAG_SIGNIFICA = {
+  trafego:      'Você paga por cada clique, e o contato chega sem dizer quem é. Por isso cada venda sai mais cara.',
+  mesa:         'Tem gente pronta para comprar passando pelo seu funil sem ser vista.',
+  qualificacao: 'Os contatos chegam sem filtro, e o seu tempo vai para quem ainda não está pronto.',
+  execucao:     'Você sabe o que precisa fazer, mas a estrutura não sai do papel.'
+};
+function areaLabel(k, pct){
+  var t = AREA_LABELS[k] || [[0,'']];
+  for (var i=0;i<t.length;i++) if (pct >= t[i][0]) return t[i][1];
+  return t[t.length-1][1];
+}
+
+/* a de sexo mora na capa; as outras quatro sao as genericas da casa */
+var Q_CAPA = { n:101, key:'sexo', text:'Você é homem ou mulher?', opts:[
+  ['👨','Homem','homem'], ['👩','Mulher','mulher']
+]};
+
+var Q_DEMO = [
+  { n:102, key:'idade', text:'Qual a sua idade?', opts:[
+    ['🌱','19 a 29 anos'], ['🌿','30 a 39 anos'], ['🌳','40 a 49 anos'], ['🍂','50 anos ou mais'] ]},
+  /* as tres sao sim ou nao de proposito: um toque so, sem o lead ler opcao */
+  { n:103, key:'fe', text:'Você se considera cristão(ã)?', opts:[
+    ['🙏','Sim'], ['🙅','Não'] ]},
+  { n:104, key:'estado', text:'Você é casado(a)?', opts:[
+    ['💍','Sim'], ['🙋','Não'] ]},
+  { n:105, key:'filhos', text:'Você tem filhos?', opts:[
+    ['👶','Sim'], ['🚫','Não'] ]}
+];
+
+var Q = [
+  /* ---- bloco 02, dor: fato, fato, emocao, perda, perda ---- */
+  { n:6, fase:'Dor', text:'Pra vender de novo, hoje você precisa...', opts:[
+    ['💸','Subir mais verba em anúncio'],
+    ['🔁','Reaquecer a mesma base de sempre'],
+    ['🤝','Pedir indicação, uma a uma'],
+    ['📉','Fazer outro lançamento do zero'] ]},
+  { n:7, fase:'Dor', key:'verba', text:'Quanto você investe em anúncio por mês hoje?', opts:[
+    ['🪙','Menos de R$ 10 mil'],
+    ['💳','De R$ 10 mil a R$ 30 mil'],
+    ['💼','De R$ 30 mil a R$ 100 mil'],
+    ['🏦','Acima de R$ 100 mil'] ]},
+  { n:8, fase:'Dor', text:'Quando você compara o que gastou de anúncio no mês com o que entrou, o que você sente?', opts:[
+    ['😰','Aperto: a conta fecha no limite'],
+    ['😕','Frustração: giro muito dinheiro pra sobrar pouco'],
+    ['😐','Indiferença: já me acostumei'],
+    ['😌','Tranquilidade: minha conta fecha bem'] ]},
+  { n:9, fase:'Dor', multi:true, text:'O que você já perdeu por não saber quem era o lead antes de falar com ele?',
+    ajuda:'Marque quantas quiser.', opts:[
+    ['🗣️','Gastei call inteira com quem nunca ia comprar'],
+    ['🏷️','Baixei o preço porque não sabia com quem estava falando'],
+    ['🎟️','Vendi menos ingresso de lançamento do que dava'],
+    ['🙈','Descobri tarde que o cliente bom estava na lista o tempo todo'],
+    ['📣','Falei a mesma coisa pra todo mundo, porque não dava pra separar'],
+    ['✅','Nenhuma dessas'] ]},
+  { n:10, fase:'Dor', text:'Se o seu tráfego pago parasse hoje, por quantos meses o seu faturamento se sustentaria?', opts:[
+    ['🚨','Nem um mês'], ['⏳','Um a dois meses'], ['📆','Três a seis meses'], ['🛡️','Mais de seis meses'] ]},
+
+  /* ---- bloco 03, o negocio: nao pontua, personaliza ---- */
+  { n:11, fase:'Negócio', obj:true, key:'negocio', text:'O que melhor descreve o seu negócio hoje?', opts:[
+    ['🎯','Tenho mentoria ou programa de acompanhamento'],
+    ['🚀','Sou Expert, faço lançamentos'],
+    ['🧠','Sou estrategista, monto a operação de outros'],
+    ['📦','Vendo produto digital, não sou nenhum dos três'] ]},
+
+  /* ---- bloco 04, crencas sobre o quiz ---- */
+  { n:12, fase:'Crenças', text:'O que passa pela sua cabeça quando alguém fala em colocar um quiz na frente da oferta?', opts:[
+    ['🎯','Funciona pra alguns mercados, pro meu não'],
+    ['👯','Já vi tanto quiz igual que perdeu a graça'],
+    ['🧐','Nunca vi um quiz bom no meu nicho'],
+    ['👍','Faz sentido, só não implementei ainda'] ]},
+  { n:13, fase:'Crenças', text:'Se você fosse montar um quiz hoje, o que te travaria primeiro?', opts:[
+    ['✍️','Não saber o que perguntar'],
+    ['🧱','Não saber em que ordem colocar as perguntas'],
+    ['🔧','A parte técnica: página, integração, disparo'],
+    ['⏰','Achar tempo na agenda pra isso'] ]},
+  { n:14, fase:'Crenças', text:'Na sua cabeça, pra que serve um quiz?', opts:[
+    ['🪣','Juntar lead barato, no volume'],
+    ['🎮','Engajar, entreter a audiência'],
+    ['🔍','Qualificar o lead antes da call'],
+    ['💰','Vender direto, sem precisar de call'] ]},
+  { n:15, fase:'Crenças', text:'Quanto tempo você acha que leva pra montar um quiz que converte?', opts:[
+    ['🕐','Alguns dias'], ['📅','Algumas semanas'], ['🗓️','Mais de um mês'], ['🤷','Não faço ideia'] ]},
+  { n:16, fase:'Crenças', text:'O que te faria acreditar que um quiz daria certo na sua operação?', opts:[
+    ['📊','Ver o número de quem já rodou'],
+    ['👀','Ver um exemplo do meu próprio nicho'],
+    ['🧪','Testar eu mesmo, com pouca verba'],
+    ['🙅','Nada. Eu não acredito nesse formato'] ]},
+
+  /* ---- bloco 05, objecao de identidade ---- */
+  { n:17, fase:'Identidade', text:'O que passa pela sua cabeça quando você vê um quiz de captação por aí?', opts:[
+    ['🙄','Parece marketing raso'],
+    ['🤨','Funciona, mas não é o meu estilo'],
+    ['🤔','Nunca parei pra olhar direito'],
+    ['👏','Acho inteligente, já quis fazer um'] ]},
+  { n:18, fase:'Identidade', text:'Você já deixou de testar um formato novo por achar que pegaria mal com a sua audiência?', opts:[
+    ['🔁','Sim, mais de uma vez'], ['☝️','Sim, uma vez'], ['🧪','Não, eu testo tudo'], ['🤷','Nunca pensei nisso'] ]},
+  { n:19, fase:'Identidade', multi:true, text:'O que te seguraria de colocar um quiz no ar amanhã?',
+    ajuda:'Marque quantas quiser.', opts:[
+    ['👯','Medo de ficar igual ao de todo mundo'],
+    ['✍️','Não saber escrever as perguntas'],
+    ['🔧','Não ter quem monte a parte técnica'],
+    ['🙊','Achar que a minha audiência não responderia'],
+    ['📊','Não ter certeza de que dá retorno'],
+    ['🚀','Nada disso, eu colocaria'] ]},
+  { n:20, fase:'Identidade', text:'De onde você tirou a forma como capta lead hoje?', opts:[
+    ['📚','Do curso ou da mentoria que eu fiz'],
+    ['👀','De olhar quem eu admiro no mercado'],
+    ['🧪','Testando na raça, sozinho'],
+    ['🤷','Nunca parei pra pensar nisso'] ]},
+
+  /* ---- bloco 06, possibilidade ---- */
+  { n:21, fase:'Possibilidade', text:'Se existisse uma forma de trazer lead qualificado que se paga sozinha, você acredita que funcionaria no seu mercado?', opts:[
+    ['💯','Acredito'], ['🙂','Acredito, mas acho difícil no meu caso'],
+    ['🤔','Tenho dúvida'], ['🙅','Não acredito'] ]},
+  { n:22, fase:'Possibilidade', key:'prazo', text:'Em quanto tempo você gostaria de saber quem, na sua lista, está pronto pra comprar?', opts:[
+    ['⚡','Nos próximos 30 dias'], ['📅','Em 3 meses'], ['🗓️','Em 6 meses'], ['🕰️','Em um ano'] ]},
+  { n:23, fase:'Possibilidade', key:'impedimento', text:'Hoje, qual é o seu maior impedimento pra isso?', opts:[
+    ['🧩','Não sei montar o quiz'],
+    ['⏰','Não tenho tempo pra estruturar'],
+    ['❓','Não sei o que perguntar pro lead'],
+    ['🔁','Eu começo e não termino'] ]}
+];
+
+/* as duas perguntas que nao pontuam e moram depois do diagnostico */
+var Q_COMPROMISSO = { n:24, text:'O quanto você quer resolver isso nos próximos 30 dias?', opts:[
+  ['🔥','Muito: é prioridade'], ['👍','Quero, mas tenho outras prioridades'],
+  ['🤏','Um pouco'], ['😐','Não é o momento'] ]};
+var Q_ULTIMA = { n:25, key:'quando', text:'Se você tivesse o quiz pronto, com as perguntas escritas e a página no ar, você colocaria pra rodar?', opts:[
+  ['🚀','Colocaria essa semana'], ['📅','Colocaria ainda neste mês'], ['🤝','Colocaria, se tivesse ajuda pra montar'] ]};
+
+/* =====================================================================
+   BIFURCACAO (16/10, pedido do Felipe): aprender sozinho ou o time implementa.
+   So liga no braco case_bif do bandit, ou com ?bif=1 para revisar, e so
+   aparece para quem tem perfil de implementacao (perfilImplementacao). As 4
+   perguntas nao pontuam no diagnostico e nao falam em valor: o valor da
+   implementacao so aparece na call.
+   Estrategia: estrategia/2026-10-16-bifurcacao-implementacao-quiz-perpetuo.md
+   ===================================================================== */
+var QI = [
+  { n:201, key:'impl_vende', text:'A sua mentoria já vende hoje?', opts:[
+    ['📈','Sim, vendo todo mês'], ['🔁','Vendo, mas sem constância'],
+    ['🧱','Está pronta, mas ainda não vendi'], ['🌱','Ainda não tenho mentoria'] ]},
+  { n:202, key:'impl_fat', text:'Quanto a sua mentoria fatura por mês hoje?', opts:[
+    ['🪙','Até R$ 10 mil'], ['💳','De R$ 10 mil a R$ 30 mil'],
+    ['💼','De R$ 30 mil a R$ 100 mil'], ['🏦','Acima de R$ 100 mil'] ]},
+  { n:203, key:'impl_decide', text:'Quem decide sobre investir na implementação?', opts:[
+    ['🙋','Eu decido'], ['🤝','Eu e meu sócio, e ele vem para a call'], ['👤','Outra pessoa decide'] ]},
+  { n:204, key:'impl_comeca', text:'Se fizer sentido na conversa, você consegue começar nos próximos 30 dias?', opts:[
+    ['✅','Sim, já tenho verba separada para isso'], ['🗓️','Consigo, preciso me organizar'], ['⏸️','Agora não consigo'] ]}
+];
+
+/* A REGUA, num lugar so (numeros propostos em 16/10, para o Felipe ajustar).
+   qualificado: vende hoje, quem decide esta na call, e fatura R$ 30 mil ou
+   mais (com verba ou se organizando), ou fatura R$ 10 a 30 mil com verba
+   separada e anuncio de R$ 10 mil ou mais. Os indices sao das opcoes. */
+var REGUA_IMPLEMENTACAO = { fatMinimo: 2, fatComVerba: 1, verbaAnuncioMinima: 1 };
+function resultadoImplementacao(){
+  var r = state.resp, R = REGUA_IMPLEMENTACAO;
+  if (r.impl_vende === 3 || r.impl_fat === 0 || r.impl_comeca === 2) return 'nao';
+  var vendeHoje = r.impl_vende === 0 || r.impl_vende === 1;
+  var decisor = r.impl_decide !== 2;
+  var qualif = vendeHoje && decisor && (
+    (r.impl_fat >= R.fatMinimo && (r.impl_comeca === 0 || r.impl_comeca === 1)) ||
+    (r.impl_fat === R.fatComVerba && r.impl_comeca === 0 && (r.verba || 0) >= R.verbaAnuncioMinima));
+  return qualif ? 'qualificado' : 'quase';
+}
+/* quem ve a bifurcacao: mentoria ou expert (P11) com pelo menos um sinal de
+   que quer o funil pronto. O resto vai direto ao metodo, com um link discreto
+   no fim da oferta. */
+function perfilImplementacao(){
+  var r = state.resp;
+  var mentorOuExpert = r.negocio === 0 || r.negocio === 1;
+  var sinal = r.quando === 2 || r.impedimento === 1 || r.impedimento === 3 || (r.verba || 0) >= 1;
+  return mentorOuExpert && sinal;
+}
+function implRotulo(i){
+  var q = QI[i], v = state.resp[q.key];
+  return (v != null && q.opts[v]) ? q.opts[v][1] : '';
+}
+
+/* 16/10 (pedido do Ricardo): o perfil vai para o card do Falume. Quem atende o
+   WhatsApp abre a conversa sabendo se é mentoria, expert de lançamento,
+   estrategista ou produto digital, quanto anuncia e o que trava, sem perguntar
+   de novo o que o quiz já perguntou. Só o rótulo da opção, nada de pontuação.
+   Processo comercial: comercial/falume/ (pasta interna). */
+function rotuloDe(q, chave){
+  if (!q) return '';
+  var v = state.resp[chave || q.key || ('P' + q.n)];
+  return (v != null && q.opts && q.opts[v]) ? q.opts[v][1] : '';
+}
+function rotuloDaChave(k){
+  for (var i = 0; i < Q.length; i++) if (Q[i].key === k) return rotuloDe(Q[i], k);
+  return '';
+}
+function perfilParaCRM(){
+  var n = state.resp.negocio;
+  return {
+    perfil_negocio: rotuloDaChave('negocio'),
+    negocio_i: (typeof n === 'number') ? n : '',
+    verba_anuncio: rotuloDaChave('verba'),
+    impedimento: rotuloDaChave('impedimento'),
+    prazo_lista: rotuloDaChave('prazo'),
+    compromisso_30d: rotuloDe(Q_COMPROMISSO, 'P' + Q_COMPROMISSO.n),
+    colocaria_rodar: rotuloDe(Q_ULTIMA, 'quando')
+  };
+}
+
+/* =====================================================================
+   3. VIDEOS E INSERCOES
+   ===================================================================== */
+var VIDEOS = {
+  generico:   { id:'hWPExOSosS4', titulo:'Percebeu que você nem pensou muito pra responder?',
+                texto:'' },
+  dor:        { id:'sLp6oudPZTc', titulo:'CPA cada vez mais caro?',
+                texto:'Você vai conseguir vender para um público novo, além de economizar com o tráfego.' },
+  crencas:    { id:'dXtxJlgZdMo', titulo:'Por que quase ninguém acerta o quiz',
+                texto:'Isso que você marcou agora é o que eu mais escuto. E tem explicação.' },
+  identidade: { id:'fpI0cM1UV14', titulo:'O que manda é a narrativa',
+                texto:'O quiz funciona para todos os nichos, e precisa conectar com o expert.' }
+};
+
+var RESPIROS = [
+  { after:7, se:function(){ return (state.resp.P7 || 0) >= 1; },
+    dado:'+61%', alta:61, texto:'foi quanto subiu o custo por mil impressões no Brasil nos últimos dois anos, segundo os relatórios públicos de leilão da Meta.',
+    /* 16/10: tirado o aviso interno que aparecia para o cliente no lugar da fonte */
+    fonte:'',
+    reenquadre:'Não é a sua campanha que piorou. É o leilão.',
+    gancho:'E o pior não é o preço: é que você paga o mesmo por quem ia comprar e por quem nunca ia. Os dois chegam iguais.' },
+];
+
+
+/* =====================================================================
+   O JOGO DOS PRESENTES
+   Cada presente e um bonus real. Fica guardado no cofre e so e resgatado
+   na compra. A ordem e do mais barato para o mais caro, pro climax cair
+   no ultimo, que e o que vem logo antes do formulario.
+   ===================================================================== */
+/* 16/10: tres presentes. O Prompt abre (pedido do Carlos: logo no comeco a
+   pessoa ve que vai conseguir montar rapido); a dor pede as perguntas; antes
+   do formulario, o mais valioso, o quiz real tela por tela */
+var GIFT_ORDER = [2, 0, 1];
+var NIVEIS = ['Nível 1 · Perfil', 'Nível 2 · Diagnóstico da dor', 'Nível 3 · Decisão'];
+state.presentes = [];
+
+/* Som sintetizado no proprio navegador: zero arquivo, zero peso.
+   O navegador so libera audio depois de um toque, entao ensure() roda no
+   primeiro clique e de novo no clique da caixa. */
+var SFX = (function(){
+  var ctx = null, ligado = true;
+  try { ligado = localStorage.getItem('qq_som') !== '0'; } catch(e){}
+  function ensure(){
+    if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return ctx; }
+    try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ ctx = null; }
+    return ctx;
+  }
+  function ruido(dur, vol, filtro){
+    var c = ensure(); if (!c || !ligado) return;
+    var n = Math.floor(c.sampleRate * dur);
+    var buf = c.createBuffer(1, n, c.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.2);
+    var src = c.createBufferSource(); src.buffer = buf;
+    var bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = filtro; bp.Q.value = .9;
+    var g = c.createGain(); g.gain.value = vol;
+    src.connect(bp); bp.connect(g); g.connect(c.destination); src.start();
+  }
+  function tom(freq, t0, dur, vol){
+    var c = ensure(); if (!c || !ligado) return;
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = 'triangle'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, c.currentTime + t0);
+    g.gain.linearRampToValueAtTime(vol, c.currentTime + t0 + .02);
+    g.gain.exponentialRampToValueAtTime(.001, c.currentTime + t0 + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(c.currentTime + t0); o.stop(c.currentTime + t0 + dur + .05);
+  }
+  return {
+    ensure: ensure,
+    ligado: function(){ return ligado; },
+    alterna: function(){
+      ligado = !ligado;
+      try { localStorage.setItem('qq_som', ligado ? '1' : '0'); } catch(e){}
+      return ligado;
+    },
+    toque: function(){ tom(880, 0, .1, .08); },
+    /* palmas: varias rajadas curtas de ruido, que e como plateia soa */
+    palmas: function(){
+      for (var i = 0; i < 22; i++) {
+        (function(k){ setTimeout(function(){ ruido(.09, .05 + Math.random() * .04, 1400 + Math.random() * 1800); },
+          k * 26 + Math.random() * 30); })(i);
+      }
+    },
+    fanfarra: function(){ [523,659,784,1046].forEach(function(fq, i){ tom(fq, i * .1, .26, .09); }); }
+  };
+})();
+document.addEventListener('pointerdown', function um(){ SFX.ensure(); document.removeEventListener('pointerdown', um); });
+
+var elCofre = document.getElementById('cofre');
+var elSlots = document.getElementById('gtSlots');
+var elGtN   = document.getElementById('gtN');
+
+function valorPresente(i){ return (CFG.VAL_BONUS || [])[i] || 0; }
+function somaCofre(){
+  return state.presentes.reduce(function(a, i){ return a + valorPresente(i); }, 0);
+}
+function desenhaCofre(pop){
+  /* o cofre aparece desde a capa, ainda zerado: a barra do topo so faz
+     sentido se estiver la desde o comeco, e quatro slots vazios ja contam
+     que tem presente pela frente */
+  elCofre.classList.remove('hide');
+  elSlots.innerHTML = GIFT_ORDER.map(function(idx, i){
+    var tem = state.presentes.indexOf(idx) > -1;
+    return '<span class="gt-s' + (tem ? ' on' : '') +
+      (pop && tem && idx === state.presentes[state.presentes.length-1] ? ' pop' : '') +
+      '">' + (tem ? '&#10003;' : (i+1)) + '</span>';
+  }).join('');
+  elGtN.textContent = state.presentes.length + '/' + GIFT_ORDER.length;
+}
+
+document.getElementById('gtSom').addEventListener('click', function(){
+  var on = SFX.alterna();
+  this.innerHTML = on ? '&#128266;' : '&#128263;';
+  if (on) SFX.toque();
+});
+document.getElementById('gtCofre').addEventListener('click', abreCofre);
+
+function abreCofre(){
+  var cx = document.getElementById('modalCx');
+  cx.innerHTML = '<h3>O seu cofre</h3>' +
+    (state.presentes.length
+      ? '<div class="stack">' + state.presentes.map(function(i){
+          return '<div class="st-i"><span class="ico">&#127873;</span>' +
+            '<span class="tx"><b>' + esc(BONUS[i][0]) + '</b><span>' + esc(BONUS[i][1]) + '</span></span>' +
+            '<span class="pr"><s>' + fmt(valorPresente(i)) + '</s><em>SEU</em></span></div>';
+        }).join('') + '</div>' +
+        '<p class="peq">Acumulado: <b style="color:var(--yel)">' + fmt(somaCofre()) + '</b>. ' +
+        'Tudo isso fica reservado no seu nome e é resgatado quando você entrar.</p>'
+      : '<p class="peq">Você ainda não abriu nenhum presente.</p>') +
+    '<button class="btn" id="fecharModal" type="button">Fechar</button>';
+  document.getElementById('modal').classList.add('on');
+  document.getElementById('fecharModal').addEventListener('click', fechaModal);
+}
+function fechaModal(){ document.getElementById('modal').classList.remove('on'); }
+document.getElementById('modal').addEventListener('click', function(e){ if (e.target === this) fechaModal(); });
+
+/* confete em canvas: mais leve que dezenas de elementos no DOM */
+function confete(){
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var cv = document.getElementById('confete'), ctx = cv.getContext('2d');
+  cv.width = innerWidth; cv.height = innerHeight;
+  var cores = ['#FFD200','#FFA800','#F2F0E6','#5FCF8A'];
+  var ps = [];
+  for (var i = 0; i < 110; i++) ps.push({
+    x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * .5,
+    w: 5 + Math.random() * 6, h: 8 + Math.random() * 8,
+    vy: 2.4 + Math.random() * 3.2, vx: -1.4 + Math.random() * 2.8,
+    r: Math.random() * Math.PI, vr: -.14 + Math.random() * .28,
+    c: cores[(Math.random() * cores.length) | 0]
+  });
+  var t0 = performance.now();
+  (function quadro(t){
+    var dt = t - t0;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ps.forEach(function(p){
+      p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.fillStyle = p.c; ctx.globalAlpha = Math.max(0, 1 - dt / 2600);
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
+    });
+    if (dt < 2600) requestAnimationFrame(quadro);
+    else ctx.clearRect(0, 0, cv.width, cv.height);
+  })(t0);
+}
+
+function svgCaixa(){
+  return '<svg viewBox="0 0 200 190" aria-hidden="true">' +
+    '<rect x="34" y="74" width="132" height="98" rx="10" fill="#1A2620" stroke="#FFD200" stroke-width="2.5"/>' +
+    '<rect x="24" y="50" width="152" height="34" rx="9" fill="#FFD200"/>' +
+    '<rect x="88" y="50" width="24" height="122" fill="#FFA800"/>' +
+    '<path d="M100 50 C100 28 76 20 70 34 C64 48 88 50 100 50 Z" fill="#FFD200"/>' +
+    '<path d="M100 50 C100 28 124 20 130 34 C136 48 112 50 100 50 Z" fill="#FFD200"/>' +
+    '<circle cx="100" cy="47" r="7" fill="#FFA800"/>' +
+  '</svg>';
+}
+
+function telaPresente(p){
+  var idx = GIFT_ORDER[p.g];
+  var b = BONUS[idx];
+  var aberto = state.presentes.indexOf(idx) > -1;
+
+  function mostraCard(){
+    elTela.onclick = null;
+    elTela.style.cursor = '';
+    elTela.innerHTML =
+      '<span class="selo"><i></i> ' + esc(NIVEIS[p.g]) + '</span>' +
+      '<h2>Você desbloqueou um presente</h2>' +
+      '<div class="p-card">' +
+        '<span class="ico">&#127873;</span>' +
+        '<h3>' + esc(b[0]) + '</h3>' +
+        '<p class="peq">' + esc(b[1]) + '</p>' +
+        (b[2] ? '<p class="porque">' + esc(b[2]) + '</p>' : '') +
+        '<span class="val"><s>' + fmt(valorPresente(idx)) + '</s>GRÁTIS</span>' +
+      '</div>' +
+      '<div class="p-guardado"><span>&#128274;</span><span><b>Guardado no seu cofre.</b> ' +
+        'Este presente fica reservado no seu nome e você resgata o acesso ao entrar.</span></div>' +
+      '<p class="peq" style="text-align:center">' + state.presentes.length + ' de ' +
+        GIFT_ORDER.length + ' &middot; <b style="color:var(--yel)">' + fmt(somaCofre()) +
+        '</b> acumulados</p>' +
+      '<button class="btn" id="segue" type="button">Continuar</button>';
+    document.getElementById('segue').addEventListener('click', proximo);
+  }
+
+  if (aberto) { desenhaCofre(false); mostraCard(); return; }
+
+  elTela.innerHTML =
+    '<span class="selo"><i></i> ' + esc(NIVEIS[p.g]) + '</span>' +
+    '<h2 style="text-align:center">Você ganhou um presente</h2>' +
+    '<button class="caixa-p" id="cx" type="button" aria-label="Abrir o presente">' + svgCaixa() + '</button>' +
+    '<p class="toque">Toque para abrir</p>';
+
+  /* 16/10: a tela toda abre o presente, nao so a caixa: quem tocava no
+     "Toque para abrir" nao via nada acontecer */
+  elTela.style.cursor = 'pointer';
+  elTela.onclick = function(){
+    var cx = document.getElementById('cx');
+    if (!cx || cx.dataset.indo) return;
+    cx.dataset.indo = '1';
+    SFX.ensure(); SFX.toque();
+    cx.classList.add('treme');
+    setTimeout(function(){
+      state.presentes.push(idx);
+      desenhaCofre(true);
+      confete(); SFX.palmas(); SFX.fanfarra();
+      track('PresenteAberto', { bonus: b[0], valor: valorPresente(idx), total: somaCofre() });
+      mostraCard();
+    }, 520);
+  };
+}
+
+/* =====================================================================
+   4. SCORING
+   ===================================================================== */
+var Q_MAP = {}; Q.forEach(function(q){ Q_MAP[q.n] = q; });
+
+function optScore(n, idx){
+  var q = Q_MAP[n];
+  if (MULTI.has(n)) {
+    var marcadas = (state.multi['P'+n] || []);
+    var nenhuma = q.opts.length - 1;
+    if (marcadas.indexOf(nenhuma) > -1 || !marcadas.length) return 1;
+    return Math.max(1, Math.min(4, marcadas.length));
+  }
+  if (typeof idx !== 'number') return 1;
+  var n_opts = q ? q.opts.length : 4;
+  /* normaliza para 1 a 4 mesmo quando a pergunta tem 3 ou 5 opcoes */
+  var bruto = INVERTED.has(n) ? idx : (n_opts - 1 - idx);
+  return 1 + (bruto / Math.max(1, n_opts - 1)) * 3;
+}
+
+function computeScores(){
+  var soma = {}, max = {}, total = 0, totalMax = 0;
+  AREA_KEYS.forEach(function(k){
+    soma[k] = 0; max[k] = AREAS[k].questions.length * 4;
+    AREAS[k].questions.forEach(function(n){ soma[k] += optScore(n, state.resp['P'+n]); });
+    total += soma[k]; totalMax += max[k];
+  });
+  var geral = Math.round((total / totalMax) * 100);
+  var nivel = 'Leve';
+  if (geral >= 75) nivel = 'Crítico';
+  else if (geral >= 55) nivel = 'Alto';
+  else if (geral >= 35) nivel = 'Moderado';
+
+  var pct = {};
+  AREA_KEYS.forEach(function(k){ pct[k] = Math.round((soma[k] / max[k]) * 100); });
+
+  /* nunca 100% e nunca empate: teto 96, piso 38, degrade por posicao */
+  var rank = AREA_KEYS.slice().sort(function(a,b){
+    return (pct[b] - pct[a]) || (AREA_KEYS.indexOf(a) - AREA_KEYS.indexOf(b));
+  });
+  var TETO = 96, PISO = 38;
+  rank.forEach(function(k,i){ pct[k] = Math.max(PISO, Math.min(TETO, pct[k]) - i); });
+
+  return { geral: Math.min(TETO, geral), nivel: nivel, pct: pct, rank: rank,
+           top: rank[0], segundo: rank[1],
+           segmento: nivel.toLowerCase() + '|' + rank[0] };
+}
+
+/* =====================================================================
+   5. FLUXO: A FONTE DA VERDADE DA ORDEM
+   ===================================================================== */
+function buildFlow(){
+  /* Na versao case a capa vira duas telas: a abertura (foto, promessa e um
+     botao) e a pergunta de homem ou mulher logo depois. Vai contra a regra
+     da casa de a capa ja ser a primeira pergunta, a pedido do Carlos, e e
+     justamente o que essa versao separada permite medir. */
+  var f = VERSAO === 'case' ? [{ kind:'abertura' }, { kind:'capa' }] : [{ kind:'capa' }];
+  Q_DEMO.forEach(function(q){ f.push({ kind:'demo', q:q }); });
+  f.push({ kind:'presente', g:0 });          /* nivel 1, depois do perfil: o Prompt */
+  f.push({ kind:'video', k:'generico' });
+
+  Q.forEach(function(q){
+    f.push({ kind:'q', q:q });
+    RESPIROS.forEach(function(r){ if (r.after === q.n) f.push({ kind:'respiro', r:r }); });
+    if (q.n === 10) { f.push({ kind:'video', k:'dor' }); f.push({ kind:'presente', g:1 }); }
+    if (q.n === 16) f.push({ kind:'video', k:'crencas' });
+    if (q.n === 20) f.push({ kind:'video', k:'identidade' });
+  });
+
+  f.push({ kind:'loading', qual:'diagnostico' });
+  f.push({ kind:'resultado' });
+  f.push({ kind:'q', q:Q_COMPROMISSO, solto:true });
+  f.push({ kind:'prova1' }); f.push({ kind:'prova2' }); f.push({ kind:'prova3' });
+  f.push({ kind:'prova4' }); f.push({ kind:'prova5' });
+  f.push({ kind:'q', q:Q_ULTIMA, solto:true });
+  /* o ultimo presente vem logo antes do formulario de proposito: e ele que
+     da o motivo pra pessoa preencher. "Agora eu preciso saber pra quem eu
+     entrego tudo isso." */
+  f.push({ kind:'presente', g:2 });
+  f.push({ kind:'form' });
+  f.push({ kind:'loading', qual:'plano' });
+  /* bifurcacao: as telas existem no caminho de todos do braco case_bif, mas
+     cada uma so e pisada quando o `se` dela vale (ver pulaVazio) */
+  if (BIF) {
+    /* aparece para o perfil de implementacao, e tambem para quem voltou das
+       4 perguntas (chegou pelo link da oferta): ai ela e a saida para o metodo */
+    f.push({ kind:'bifurcacao', se: function(){ return perfilImplementacao() || state.caminho === 'impl'; } });
+    QI.forEach(function(q){ f.push({ kind:'q', q:q, se: function(){ return state.caminho === 'impl'; } }); });
+    f.push({ kind:'implResultado', se: function(){ return state.caminho === 'impl'; } });
+  }
+  f.push({ kind:'oferta' });
+  return f;
+}
+
+/* =====================================================================
+   6. NAVEGACAO
+   ===================================================================== */
+var elTela  = document.getElementById('tela');
+var elProg  = document.getElementById('prog');
+var elVoltar= document.getElementById('voltar');
+var elFixo  = document.getElementById('fixo');
+var elBtnFixo = document.getElementById('btnFixo');
+var elToast = document.getElementById('toast');
+
+function esc(s){ return String(s == null ? '' : s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function primeiroNome(){ return (state.nome || '').trim().split(/\s+/)[0] || ''; }
+
+/* concordancia de genero, a partir da pergunta da capa */
+function g(m, f){ return state.resp.sexo === 'mulher' ? f : m; }
+
+var TOTAL_PERGUNTAS = 1 + Q_DEMO.length + Q.length + 2;
+
+function updateProgress(){
+  var p = state.flow[state.idx];
+  var meta = state.flow.findIndex(function(x){ return x.kind === 'resultado'; });
+  var pct;
+  if (p.kind === 'capa' || p.kind === 'abertura') pct = 3;
+  else if (meta > 0 && state.idx <= meta) pct = Math.round((state.idx / meta) * 100);
+  else pct = 100;
+  pct = Math.max(3, Math.min(100, pct));
+  if (pct > state.progMax) state.progMax = pct;
+  elProg.style.width = state.progMax + '%';
+
+  var podeVoltar = state.idx > 0 && ['demo','q','respiro','video','form','presente','capa'].indexOf(p.kind) > -1;
+  elVoltar.classList.toggle('hide', !podeVoltar);
+}
+
+/* uma insercao condicional so entra no caminho se a resposta que a justifica
+   foi dada. A condicao nao pode morar no buildFlow, que roda antes de existir
+   resposta: ela e avaliada aqui, na hora de pisar na tela. */
+function pulaVazio(i, dir){
+  var limite = 0;
+  while (i > 0 && i < state.flow.length && limite++ < 30) {
+    var p = state.flow[i];
+    /* 16/10: vale para o respiro (p.r.se) e para as telas da bifurcacao (p.se) */
+    var se = p.se || (p.kind === 'respiro' && p.r && p.r.se);
+    if (!se || se()) break;
+    i += dir;
+  }
+  return i;
+}
+function irPara(i, dir){
+  var d = dir || (i >= state.idx ? 1 : -1);
+  i = pulaVazio(Math.max(0, Math.min(state.flow.length - 1, i)), d);
+  state.idx = Math.max(0, Math.min(state.flow.length - 1, i));
+  render();
+  try { window.scrollTo({ top:0, behavior:'instant' }); } catch(e){ window.scrollTo(0,0); }
+}
+function proximo(){ irPara(state.idx + 1, 1); }
+function anterior(){ irPara(state.idx - 1, -1); }
+elVoltar.addEventListener('click', anterior);
+
+function toast(txt){
+  elToast.textContent = txt;
+  elToast.classList.add('on');
+  setTimeout(function(){ elToast.classList.remove('on'); }, 2600);
+}
+
+/* =====================================================================
+   7. TELAS
+   ===================================================================== */
+function render(){
+  var p = state.flow[state.idx];
+  /* cada tela de video registra um ouvinte no window: solta o da tela
+     anterior antes de desenhar a proxima, senao eles se acumulam */
+  if (state.limpaVideo) { state.limpaVideo(); state.limpaVideo = null; }
+  elFixo.classList.add('hide');
+  /* a barra fixa e reaproveitada entre telas: sem limpar, o botao chega na
+     proxima ainda pulsando e o rodape continua reservando espaco */
+  document.body.classList.remove('com-barra');
+  elBtnFixo.classList.remove('pisca');
+  elBtnFixo.onclick = null;
+  elBtnFixo.disabled = false;
+  elTela.onclick = null;
+  elTela.style.cursor = '';
+  /* o foco da opcao tocada nao pode passar para a tela seguinte */
+  try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch(e){}
+  document.body.classList.toggle('centro', ['abertura','video','oferta'].indexOf(p.kind) < 0);
+  var topo = document.getElementById('topo');
+  if (topo) document.documentElement.style.setProperty('--topo-h', topo.offsetHeight + 'px');
+  desenhaCofre(false);
+  elTela.style.animation = 'none';
+  void elTela.offsetWidth;
+  elTela.style.animation = '';
+  var fn = {
+    abertura: telaAbertura, capa: telaCapa, demo: telaPergunta, q: telaPergunta, video: telaVideo,
+    presente: telaPresente,
+    respiro: telaRespiro, loading: telaLoading, resultado: telaResultado,
+    prova1: prova1, prova2: prova2, prova3: prova3, prova4: prova4, prova5: prova5,
+    form: telaForm, oferta: telaOferta,
+    bifurcacao: telaBifurcacao, implResultado: telaImplResultado
+  }[p.kind];
+  fn(p);
+  rastreia('tela', { tela: state.idx, rotulo: rotuloTela(p) });
+  updateProgress();
+}
+
+/* ---------- capa: a pergunta de sexo, com as duas fotos ---------- */
+/* =====================================================================
+   HEADLINES DA CAPA: os braços do bandit (CONTRATO.md, item 2).
+   A copy mora aqui; do servidor vem só o número, em ?h=.
+   ===================================================================== */
+var HEADLINES = {
+  1: { a:'O quiz não parou de funcionar.', b:'Parou o jeito antigo de fazer quiz.',
+       c:'E é ele que está deixando o seu <em>dinheiro na mesa</em>.',
+       sub:'A Revolução do Quiz já começou. Faça o diagnóstico e veja quanto a sua operação está deixando de faturar.' },
+  2: { a:'Enquanto o seu quiz é do jeito antigo,', b:'o <em>dinheiro fica na mesa</em>.',
+       c:'E vai para quem já mudou.',
+       sub:'A Revolução do Quiz já começou. Faça o diagnóstico e descubra quanto a sua operação está deixando pra trás.' },
+  3: { a:'Quem ainda faz quiz do jeito antigo', b:'está deixando <em>dinheiro na mesa</em>.',
+       c:'E ficando pra trás.',
+       sub:'A Revolução do Quiz já começou. Faça o diagnóstico e veja quanto a sua captação perde hoje.' },
+  4: { a:'O jeito antigo de fazer quiz', b:'não ficou só pra trás.',
+       c:'Ele está deixando <em>dinheiro na mesa</em>.',
+       sub:'A Revolução do Quiz já começou. Faça o diagnóstico e descubra onde a sua operação está perdendo venda.' }
+};
+var HEADLINE = (function(){
+  try {
+    var q = new URLSearchParams(location.search);
+    var n = Number(q.get('h') || String(q.get('arm') || '').replace(/^h/, ''));
+    return HEADLINES[n] ? n : 3;
+  } catch(e){ return 3; }
+})();
+var HL = HEADLINES[HEADLINE];
+
+/* VERSAO CASE (14/10, pedido do Carlos): a mesma pagina, com a capa da
+   autoridade do case. Mora no MESMO arquivo de proposito: duas copias do
+   quiz se desencontram na primeira correcao que entrar so numa delas.
+   Escolhida pelo endereco case.mentorscale.com.br, ou por ?versao=case pra
+   testar em qualquer lugar. Daqui pra baixo o quiz e identico. */
+/* VERSAO DIRETO (16/10, pedido do Felipe): o segundo braco do bandit. O
+   mesmo texto da abertura do case, sem a foto e sem o botao: a headline, o
+   subtitulo e a pergunta de homem ou mulher na mesma tela, tudo na primeira
+   dobra. Escolhida por ?versao=direto (e o endereco do braco no bandit). */
+var VERSAO = (function(){
+  try {
+    var v = new URLSearchParams(location.search).get('versao');
+    if (v === 'case' || v === 'direto') return v;
+    return 'case'; /* réplica de case.mentorscale.com.br */
+  } catch(e){ return 'padrao'; }
+})();
+/* 14/10, segunda rodada: o Carlos achou a capa poluida. Sairam o carimbo
+   amarelo do valor e a legenda da foto; o nome do produto deixou de ser
+   selo e virou so o nome, pequeno, acima da headline. A pergunta de homem
+   ou mulher foi pra tela seguinte, depois de um botao. */
+var CAPA_CASE = {
+  // o ?v= muda a cada foto nova: a imagem fica 24 h no cache do navegador, e
+  // sem ele quem ja abriu a pagina continua vendo a foto antiga
+  foto: '/img/case-pablo-ricardo.webp?v=26',
+  alt: 'Pablo Marçal e Ricardo Castro',
+  botao: 'Começar meu diagnóstico',
+  b: 'Crie seu funil de quiz',
+  c: 'com a evolução do modelo usado no case de <em>R$&nbsp;22&nbsp;milhões</em> com Pablo&nbsp;Marçal.',
+  sub: 'Aplique a estrutura para vender low ticket ou captar leads qualificados para a ' +
+       'sua mentoria. Comece pelo diagnóstico da sua captação e conheça o método ao final.'
+};
+if (VERSAO === 'case' || VERSAO === 'direto') { HL = { a:'', b:CAPA_CASE.b, c:CAPA_CASE.c, sub:CAPA_CASE.sub }; }
+
+/* =====================================================================
+   RASTREIO DO BANDIT (CONTRATO.md, item 5)
+   ===================================================================== */
+var BANDIT = (function(){
+  try {
+    var q = new URLSearchParams(location.search);
+    var b = q.get('bid') || q.get('vid'), e = q.get('exp') || q.get('link'), a = q.get('arm') || q.get('braco');
+    if (b && e && a) sessionStorage.setItem('qb', JSON.stringify({ bid:b, exp:e, arm:a }));
+    else { var g = JSON.parse(sessionStorage.getItem('qb') || 'null'); if (g) { b = g.bid; e = g.exp; a = g.arm; } }
+    return (b && e && a) ? { bid:b, exp:e, arm:a } : null;
+  } catch(x){ return null; }
+})();
+/* braco case_bif do bandit, ou ?bif=1 para revisar a bifurcacao */
+var BIF = (function(){
+  try { return new URLSearchParams(location.search).get('bif') === '1' || !!(BANDIT && BANDIT.arm === 'case_bif'); }
+  catch(x){ return false; }
+})();
+/* Bandit: cada pergunta respondida vira uma etapa do funil, com o enunciado */
+var ultimaTela = null, ETAPA_N = null;
+function rastreia(evento, extra){
+  var B = window.bandit; if (!B) return;
+  if (!ETAPA_N) { ETAPA_N = {}; [Q_CAPA].concat(Q_DEMO, Q, [Q_COMPROMISSO, Q_ULTIMA, { n:'form' }], QI).forEach(function(q, i){ ETAPA_N[q.n] = i + 1; }); }
+  if (evento === 'tela') {
+    var p = state.flow[state.idx];
+    if (ultimaTela && ultimaTela.i < state.idx) {
+      var a = ultimaTela.p, qq = a.kind === 'capa' ? Q_CAPA : a.q;
+      if (qq && ETAPA_N[qq.n]) B.etapa(ETAPA_N[qq.n], qq.text);
+    }
+    if (p.kind === 'oferta') B.final();
+    ultimaTela = { i: state.idx, p: p };
+  }
+  if (evento === 'lead') { B.etapa(ETAPA_N.form, 'Enviou o cadastro'); B.lead(state.email, state.whats); }
+  if (evento === 'checkout') B.checkout();
+}
+function rastreiaAntigo(evento, extra){
+  if (!BANDIT || !/^https?:$/.test(location.protocol)) return;
+  var c = { exp:BANDIT.exp, arm:BANDIT.arm, bid:BANDIT.bid, evento:evento };
+  for (var k in (extra || {})) c[k] = extra[k];
+  try {
+    var s = JSON.stringify(c);
+    if (navigator.sendBeacon) navigator.sendBeacon('/api/evento', new Blob([s], { type:'application/json' }));
+    else fetch('/api/evento', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:s, keepalive:true });
+  } catch(x){}
+}
+function rotuloTela(p){
+  return p.kind + (p.q ? ':P' + p.q.n : '') + (p.k ? ':' + p.k : '') + (p.g != null ? ':' + p.g : '');
+}
+
+function telaCapa(){
+  var retrato = function(qual, emoji){
+    var url = qual === 'homem' ? CFG.FOTO_HOMEM : CFG.FOTO_MULHER;
+    return url ? '<span class="ret"><img src="' + esc(url) + '" alt=""></span>'
+               : '<span class="ret">' + emoji + '</span>';
+  };
+  var cards = '<div class="fotos">' +
+      Q_CAPA.opts.map(function(o, i){
+        /* o emoji ja vive dentro do circulo: repeti-lo no rotulo polui */
+        return '<button class="fcard" type="button" data-i="' + i + '">' +
+          retrato(o[2], o[0]) + '<span>' + esc(o[1]) + '</span></button>';
+      }).join('') +
+    '</div>';
+  /* versao case: a abertura (foto, headline e botao) vem antes; aqui fica so a pergunta */
+  elTela.innerHTML = (VERSAO === 'case')
+    ? '<div class="so-pergunta"><span class="qnum">Para começar</span>' +
+        '<h2>' + esc(Q_CAPA.text) + '</h2></div>' + cards
+    : (VERSAO === 'direto')
+    /* versao direto: o texto do case e a pergunta juntos, sem foto */
+    ? '<div class="capa-direto">' +
+        '<span class="marca">Revolução do Quiz</span>' +
+        '<h1 class="hl sem-a">' +
+          '<span class="hl-b">' + HL.b + '</span>' +
+          '<span class="hl-c">' + HL.c + '</span>' +
+        '</h1>' +
+        '<p class="peq">' + HL.sub + '</p>' +
+        '<h2 class="pergunta">' + esc(Q_CAPA.text) + '</h2>' +
+      '</div>' + cards
+    :
+    '<span class="selo"><i></i> A Revolução do Quiz</span>' +
+    /* a headline vem do braço do bandit (?h=1 a 4); sem braço, a 3 */
+    '<h1 class="hl">' +
+      '<span class="hl-a">' + HL.a + '</span>' +
+      '<span class="hl-b">' + HL.b + '</span>' +
+      '<span class="hl-c">' + HL.c + '</span>' +
+    '</h1>' +
+    '<p class="peq">' + HL.sub + '</p>' +
+    '<span class="qnum">' + esc(Q_CAPA.text) + '</span>' + cards;
+
+  [].forEach.call(elTela.querySelectorAll('.fcard'), function(b){
+    b.addEventListener('click', function(){
+      var i = +b.dataset.i;
+      [].forEach.call(elTela.querySelectorAll('.fcard'), function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      state.resp.P101 = i;
+      state.resp.sexo = Q_CAPA.opts[i][2];
+      track('QuizStart', { sexo: state.resp.sexo, headline: VERSAO === 'padrao' ? HEADLINE : VERSAO, versao: VERSAO });
+      setTimeout(proximo, 260);
+    });
+  });
+}
+
+/* ---------- abertura da versao case: foto, promessa e um botao ----------
+   Tudo centralizado e sem mais nada: a foto e a prova, a headline e a
+   promessa, o botao e o unico lugar pra ir. */
+function telaAbertura(){
+  elTela.innerHTML =
+    '<div class="abertura">' +
+      '<figure class="hero-case"><img src="' + esc(CAPA_CASE.foto) + '" alt="' +
+        esc(CAPA_CASE.alt) + '" width="1000" height="667"></figure>' +
+      '<span class="marca">Revolução do Quiz</span>' +
+      '<h1 class="hl sem-a">' +
+        '<span class="hl-b">' + HL.b + '</span>' +
+        '<span class="hl-c">' + HL.c + '</span>' +
+      '</h1>' +
+      '<p class="peq">' + HL.sub + '</p>' +
+      '<button class="btn btn-abre" id="abre" type="button">' +
+        '<span>' + esc(CAPA_CASE.botao) + '</span>' +
+        '<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" ' +
+          'fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      '</button>' +
+    '</div>';
+  document.getElementById('abre').addEventListener('click', function(){
+    track('CapaClique', { versao: VERSAO });
+    proximo();
+  });
+}
+
+/* =====================================================================
+   BIFURCACAO: as telas (16/10)
+   ===================================================================== */
+function indiceDe(teste){
+  for (var i = 0; i < state.flow.length; i++) if (teste(state.flow[i])) return i;
+  return -1;
+}
+function telaBifurcacao(){
+  var nome = primeiroNome();
+  elTela.innerHTML =
+    '<div class="bif">' +
+      '<span class="marca-bif">' + (nome ? esc(nome) + ', o seu plano está pronto' : 'Seu plano está pronto') + '</span>' +
+      '<h2>Como você quer colocar o seu funil de quiz para rodar?</h2>' +
+      '<button class="bif-op" type="button" data-c="metodo">' +
+        '<b>Quero aprender e montar eu mesmo</b>' +
+        '<span>O método da Revolução do Quiz, com o passo a passo para construir o seu funil.</span>' +
+        '<i>Ver o método &rarr;</i></button>' +
+      '<button class="bif-op dest" type="button" data-c="impl">' +
+        '<b>Quero que o time implemente para mim</b>' +
+        '<span>O time da Mentor Scale, que rodou o funil do case com Pablo Marçal, monta e coloca ' +
+          'o quiz para rodar na sua mentoria. São 4 perguntas para ver se faz sentido agora.</span>' +
+        '<i>Ver se faz sentido para mim &rarr;</i></button>' +
+    '</div>';
+  [].forEach.call(elTela.querySelectorAll('.bif-op'), function(b){
+    b.addEventListener('click', function(){ escolheCaminho(b.dataset.c); });
+  });
+}
+function escolheCaminho(c){
+  state.caminho = c;
+  if (c === 'impl') {
+    rastreia('implementacao');
+    try {
+      if (sessionStorage.getItem('qq_impl') !== '1') {
+        sessionStorage.setItem('qq_impl', '1');
+        track('EscolheuImplementacao', { versao: VERSAO });
+      }
+    } catch(e){ track('EscolheuImplementacao', { versao: VERSAO }); }
+    var i = indiceDe(function(p){ return p.q && p.q.n === QI[0].n; });
+    if (i > -1) { irPara(i, 1); return; }
+  }
+  proximo();
+}
+function linkWhatsTime(){
+  var msg = 'Oi, vim do quiz da Revolução do Quiz e quero entender a implementação do funil de quiz.' +
+    ' Minha mentoria: ' + implRotulo(0) + '. Faturamento: ' + implRotulo(1) + '.' +
+    ' Quem decide: ' + implRotulo(2) + '. Começar: ' + implRotulo(3) + '.' +
+    (state.nome ? ' Sou ' + state.nome + '.' : '');
+  return 'https://wa.me/' + CFG.WHATS_TIME + '?text=' + encodeURIComponent(msg);
+}
+function botaoMetodo(texto, classe){
+  return '<button class="' + (classe || 'link-metodo') + '" type="button" id="metodo">' + esc(texto) + '</button>';
+}
+function ligaMetodo(){
+  var m = document.getElementById('metodo');
+  if (m) m.addEventListener('click', function(){ state.caminho = 'metodo'; proximo(); });
+}
+function telaImplResultado(){
+  var res = resultadoImplementacao();
+  /* o CRM recebe o resultado uma vez por resposta diferente, nao a cada volta na tela */
+  if (state.implEnviado !== res) {
+    state.implEnviado = res;
+    enviaCRM('implementacao', {
+      impl_resultado: res, impl_vende: implRotulo(0), impl_faturamento: implRotulo(1),
+      impl_decide: implRotulo(2), impl_comeca: implRotulo(3),
+      tag: 'PERPÉTUO · IMPLEMENTAÇÃO · ' + ({ qualificado:'QUALIFICADO', quase:'QUASE', nao:'NÃO AGORA' })[res]
+    });
+    if (res === 'qualificado') rastreia('lead_qualificado', { contato: { nome: state.nome, email: state.email, whatsapp: state.whats }, utm: UTM });
+  }
+  if (res === 'qualificado') return telaAgenda();
+  if (res === 'quase') {
+    elTela.innerHTML =
+      '<div class="bif">' +
+        '<span class="marca-bif">Implementação</span>' +
+        '<h2>Vale uma conversa rápida com o time antes.</h2>' +
+        '<p class="peq">Pelas suas respostas, falta uma peça para a implementação fazer sentido agora. ' +
+          'O time te responde no WhatsApp e vê com você o melhor caminho.</p>' +
+        '<a class="btn" id="btnWhats" href="' + esc(linkWhatsTime()) + '" target="_blank" rel="noopener">Falar com o time no WhatsApp</a>' +
+        botaoMetodo('Prefiro começar pelo método') +
+      '</div>';
+    document.getElementById('btnWhats').addEventListener('click', function(){ rastreia('whatsapp'); });
+    return ligaMetodo();
+  }
+  elTela.innerHTML =
+    '<div class="bif">' +
+      '<span class="marca-bif">O seu próximo passo</span>' +
+      '<h2>Hoje, o caminho que mais faz sentido é começar pelo método.</h2>' +
+      '<p class="peq">Com o passo a passo da Revolução do Quiz você monta o seu funil agora. ' +
+        'Quando a operação crescer, a implementação com o time fica para o próximo passo.</p>' +
+      botaoMetodo('Ver o método', 'btn') +
+    '</div>';
+  ligaMetodo();
+}
+
+/* A AGENDA DO RICARDO: os horarios vem do Worker (/api/agenda), que le e
+   escreve na Google Agenda dele. Sem a agenda conectada, ou com erro, quem
+   passou na regua vai para o WhatsApp do time: ninguem fica sem caminho. */
+function telaAgenda(){
+  var nome = primeiroNome();
+  elTela.innerHTML =
+    '<div class="bif">' +
+      '<span class="marca-bif">Implementação</span>' +
+      '<h2>Faz sentido conversar' + (nome ? ', ' + esc(nome) : '') + '.</h2>' +
+      '<p class="peq">Escolha um horário para uma call de 30 minutos com o Ricardo Castro, da Mentor Scale. ' +
+        'Ele olha a sua operação com você e desenha a implementação do seu funil de quiz.</p>' +
+      '<div class="agenda" id="agenda"><p class="peq">Carregando os horários...</p></div>' +
+      botaoMetodo('Prefiro começar pelo método') +
+    '</div>';
+  ligaMetodo();
+  var caixa = document.getElementById('agenda');
+  function semAgenda(){
+    caixa.innerHTML =
+      '<a class="btn" id="btnWhats" href="' + esc(linkWhatsTime()) + '" target="_blank" rel="noopener">Marcar o horário pelo WhatsApp</a>' +
+      '<p class="peq">O time te responde com os horários livres do Ricardo.</p>';
+    document.getElementById('btnWhats').addEventListener('click', function(){ rastreia('whatsapp'); });
+  }
+  if (!ok(CFG.AGENDA_API) || !/^https?:$/.test(location.protocol)) return semAgenda();
+  fetch(CFG.AGENDA_API + '/horarios', { cache:'no-store' })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d || !d.ok || !d.dias || !d.dias.length) return semAgenda();
+      desenhaHorarios(caixa, d.dias, semAgenda);
+    })
+    .catch(semAgenda);
+}
+function desenhaHorarios(caixa, dias, semAgenda, aviso){
+  var dia = 0, escolhido = null;
+  function pinta(){
+    caixa.innerHTML =
+      (aviso ? '<p class="peq aviso">' + esc(aviso) + '</p>' : '') +
+      '<div class="dias">' + dias.map(function(d, i){
+        return '<button type="button" class="dia' + (i === dia ? ' on' : '') + '" data-d="' + i + '">' + esc(d.rotulo) + '</button>';
+      }).join('') + '</div>' +
+      '<div class="horas">' + dias[dia].horarios.map(function(h){
+        return '<button type="button" class="hora' + (escolhido === h.inicio ? ' on' : '') + '" data-h="' + esc(h.inicio) + '">' + esc(h.hora) + '</button>';
+      }).join('') + '</div>' +
+      '<button class="btn" id="confirma" type="button"' + (escolhido ? '' : ' disabled') + '>' +
+        (escolhido ? 'Confirmar ' + esc(dias[dia].rotulo) + ' às ' + esc(horaDe(escolhido)) : 'Escolha um horário') + '</button>';
+    [].forEach.call(caixa.querySelectorAll('.dia'), function(b){
+      b.addEventListener('click', function(){ dia = +b.dataset.d; escolhido = null; pinta(); });
+    });
+    [].forEach.call(caixa.querySelectorAll('.hora'), function(b){
+      b.addEventListener('click', function(){ escolhido = b.dataset.h; pinta(); });
+    });
+    document.getElementById('confirma').addEventListener('click', function(){ if (escolhido) marca(escolhido); });
+  }
+  function horaDe(inicio){
+    var h = null;
+    dias[dia].horarios.forEach(function(x){ if (x.inicio === inicio) h = x.hora; });
+    return h || '';
+  }
+  function marca(inicio){
+    var bt = document.getElementById('confirma');
+    bt.disabled = true; bt.textContent = 'Marcando...';
+    var corpo = {
+      inicio: inicio, nome: state.nome, whatsapp: state.whats, email: state.email, versao: VERSAO,
+      bid: BANDIT ? BANDIT.bid : '', exp: BANDIT ? BANDIT.exp : '', arm: BANDIT ? BANDIT.arm : '',
+      respostas: { vende: implRotulo(0), faturamento: implRotulo(1), decide: implRotulo(2), comeca: implRotulo(3) },
+      utm: UTM || {}
+    };
+    fetch(CFG.AGENDA_API + '/marcar', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(corpo) })
+      .then(function(r){ return r.json().then(function(d){ return { st: r.status, d: d }; }); })
+      .then(function(x){
+        if (x.d && x.d.ok) return agendou(x.d);
+        if (x.st === 409) {
+          /* alguem pegou o horario: recarrega os livres e avisa */
+          return fetch(CFG.AGENDA_API + '/horarios', { cache:'no-store' }).then(function(r){ return r.json(); })
+            .then(function(d){
+              if (!d || !d.ok || !d.dias || !d.dias.length) return semAgenda();
+              desenhaHorarios(caixa, d.dias, semAgenda, 'Esse horário acabou de ser ocupado. Escolha outro.');
+            });
+        }
+        semAgenda();
+      })
+      .catch(semAgenda);
+  }
+  pinta();
+}
+function agendou(d){
+  try {
+    if (sessionStorage.getItem('qq_agenda') !== '1') {
+      sessionStorage.setItem('qq_agenda', '1');
+      track('Schedule', { versao: VERSAO });
+    }
+  } catch(e){ track('Schedule', { versao: VERSAO }); }
+  rastreia('agendou');
+  state.agendou = d.quando_texto || true;
+  elTela.innerHTML =
+    '<div class="bif">' +
+      '<div class="ok-agenda">&#10003;</div>' +
+      '<span class="marca-bif">Call marcada</span>' +
+      '<h2>' + esc(d.quando_texto || 'Horário confirmado') + '</h2>' +
+      '<p class="peq">A confirmação com o link da call chega no seu WhatsApp. ' +
+        'Se o seu sócio decide junto, traga ele para a conversa.</p>' +
+      botaoMetodo('Enquanto isso, ver o método') +
+    '</div>';
+  ligaMetodo();
+}
+
+/* ---------- pergunta normal e multipla ---------- */
+function telaPergunta(p){
+  var q = p.q;
+  var chave = 'P' + q.n;
+  var multi = !!q.multi;
+  var marcadas = state.multi[chave] || [];
+
+  elTela.innerHTML =
+    /* a contagem vive na barra do topo. Aqui em cima so entra aviso que a
+       pergunta precisa: o da multipla escolha. */
+    (q.ajuda ? '<span class="qnum">' + esc(q.ajuda) + '</span>' : '') +
+    '<h2>' + esc(q.text) + '</h2>' +
+    '<div class="opts">' +
+      q.opts.map(function(o, i){
+        var on = multi ? (marcadas.indexOf(i) > -1) : (state.resp[chave] === i);
+        return '<button class="opt' + (on ? ' on' : '') + '" type="button" data-i="' + i + '">' +
+          '<span class="em">' + o[0] + '</span>' +
+          '<span class="tx">' + esc(o[1]) + '</span>' +
+          '<span class="go">&#10003;</span></button>';
+      }).join('') +
+    '</div>' +
+    (multi ? '<button class="btn" id="segue" type="button" disabled>Continuar</button>' : '');
+
+  var segue = document.getElementById('segue');
+  function atualizaSegue(){
+    if (!segue) return;
+    var n = (state.multi[chave] || []).length;
+    segue.disabled = n === 0;
+    segue.textContent = n === 0 ? 'Escolha pelo menos uma' : 'Continuar';
+  }
+  atualizaSegue();
+
+  [].forEach.call(elTela.querySelectorAll('.opt'), function(b){
+    b.addEventListener('click', function(){
+      var i = +b.dataset.i;
+      if (multi) {
+        var lista = state.multi[chave] || [];
+        var nenhuma = q.opts.length - 1;
+        if (i === nenhuma) lista = (lista.indexOf(i) > -1) ? [] : [i];
+        else {
+          lista = lista.filter(function(x){ return x !== nenhuma; });
+          var pos = lista.indexOf(i);
+          if (pos > -1) lista.splice(pos, 1); else lista.push(i);
+        }
+        state.multi[chave] = lista;
+        [].forEach.call(elTela.querySelectorAll('.opt'), function(x){
+          x.classList.toggle('on', lista.indexOf(+x.dataset.i) > -1);
+        });
+        atualizaSegue();
+        return;
+      }
+      state.resp[chave] = i;
+      if (q.key) state.resp[q.key] = i;
+      [].forEach.call(elTela.querySelectorAll('.opt'), function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      track('Resposta', { pergunta: q.n, opcao: i });
+      setTimeout(proximo, 240);
+    });
+  });
+
+  if (segue) segue.addEventListener('click', function(){
+    track('Resposta', { pergunta: q.n, marcadas: state.multi[chave] });
+    proximo();
+  });
+}
+
+/* ---------- video ---------- */
+/* O video comeca sozinho, mas MUDO. Nao existe navegador que deixe tocar com
+   som sem um toque: o Chrome, o Safari e o Firefox bloqueiam todos, e o que
+   acontece quando se tenta e o video nao tocar nada. Entao ele entra tocando
+   mudo e uma faixa por cima convida a ligar o som. Um toque resolve, e o
+   video continua de onde esta em vez de voltar ao comeco. */
+/* =====================================================================
+   OS PLAYERS, QUE NASCEM UMA VEZ SO
+
+   Antes cada tela de video montava um <iframe> novo. O navegador tinha que
+   subir o player inteiro do YouTube bem na hora da troca de tela, junto com
+   a animacao de entrada, e no celular isso travava. Agora os quatro players
+   sao criados em segundo plano enquanto a pessoa responde as perguntas, e a
+   tela so acende o que precisa.
+
+   Duas regras que mandam no desenho daqui:
+   - iframe destruido perde tudo, entao nenhum player e removido do DOM;
+   - iframe movido de pai tambem recarrega, entao nenhum player troca de
+     lugar: o #videos e o pai de todos, do inicio ao fim.
+   ===================================================================== */
+var elVideos = document.getElementById('videos');
+var ORDEM_VIDEOS = ['generico','dor','crencas','identidade'];
+/* 16/10: a barrinha de progresso aparece da metade do video pra frente (o
+   efeito que o video das crencas ja traz editado; nele a nossa fica de fora
+   para nao aparecerem duas) */
+var SEM_BARRA = { crencas: 1 };
+var PLAYERS = {};
+var videoAtivo = null;
+
+/* controls=0 tira a barra, iv_load_policy=3 tira as anotacoes, rel=0 tira
+   os relacionados do fim, fs=0 tira o botao de tela cheia e disablekb=1
+   desliga o teclado. Com o iframe sem pointer-events, o titulo e o
+   "assistir no YouTube" nem chegam a aparecer.
+   autoplay=0 de proposito: o player sobe, mas nao gasta dado tocando um
+   video que a pessoa ainda nao chegou a ver. Quem manda tocar e a tela. */
+var PARAMS_VIDEO = 'mute=1&playsinline=1&controls=0&rel=0&modestbranding=1' +
+                   '&iv_load_policy=3&fs=0&disablekb=1&enablejsapi=1&loop=0' +
+                   '&cc_load_policy=0&cc_lang_pref=pt';
+
+function mandaPra(pl, comando, args){
+  if (!pl || !pl.iframe || !pl.iframe.contentWindow) return;
+  try {
+    pl.iframe.contentWindow.postMessage(JSON.stringify({
+      event: 'command', func: comando, args: args || []
+    }), '*');
+  } catch(e){}
+}
+
+function criaPlayer(chave){
+  if (PLAYERS[chave]) return PLAYERS[chave];
+  var v = VIDEOS[chave];
+  if (!v || !elVideos) return null;
+  var caixa = document.createElement('div');
+  caixa.className = 'player';
+  caixa.innerHTML =
+    '<iframe src="https://www.youtube-nocookie.com/embed/' + esc(v.id) + '?' +
+      PARAMS_VIDEO + '&autoplay=0" title="' + esc(v.titulo) + '" ' +
+      'allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" ' +
+      'allowfullscreen></iframe>' +
+    '<div class="vbar"><i></i></div>' +
+    '<button class="rever" type="button" aria-label="Ver de novo">&#8635; Ver de novo</button>' +
+    '<button class="som-on" type="button" aria-label="Ligar o som">' +
+      '<span class="faixa"><span class="ic">&#128263;</span>' +
+      '<span>Toque para ouvir</span></span></button>';
+  elVideos.appendChild(caixa);
+
+  var pl = { chave:chave, v:v, caixa:caixa,
+             iframe:caixa.querySelector('iframe'),
+             barra:caixa.querySelector('.vbar i'), dur:0,
+             som:caixa.querySelector('.som-on'),
+             desmutou:false, terminou:false, hs:null, tSom:null };
+
+  /* ate o toque o video corre mudo, entao a pessoa ja perdeu o comeco.
+     Volta pro zero antes de ligar o som: ela ouve a fala inteira. */
+  pl.som.addEventListener('click', function(){
+    mandaPra(pl, 'seekTo', [0, true]);
+    mandaPra(pl, 'unMute');
+    mandaPra(pl, 'setVolume', [100]);
+    mandaPra(pl, 'playVideo');
+    pl.som.classList.add('hide');
+    pl.caixa.classList.remove('fim');
+    elBtnFixo.classList.remove('pisca');
+    track('VideoSom', { id: pl.v.id });
+    /* O unMute viaja por postMessage, e postMessage e um tiro no escuro: se
+       o player ainda nao esta ouvindo, o comando se perde e o video segue
+       mudo sem avisar ninguem. Se em 900ms ele nao confirmar que desmutou,
+       o iframe e recarregado ja com som. O recarregamento acontece dentro
+       do gesto da pessoa, que e o que o navegador exige pra tocar com som. */
+    clearTimeout(pl.tSom);
+    pl.tSom = setTimeout(function(){
+      if (pl.desmutou || videoAtivo !== pl) return;
+      pl.desmutou = true;
+      pl.estado = undefined;
+      pl.iframe.src = 'https://www.youtube-nocookie.com/embed/' + pl.v.id + '?' +
+                      PARAMS_VIDEO.replace('mute=1', 'mute=0') + '&autoplay=1&start=0';
+      escuta(pl);
+      track('VideoSomRecarga', { id: pl.v.id });
+    }, 900);
+    clearTimeout(pl.tManual);
+    pl.tManual = setTimeout(function(){
+      /* tocando (1) ou carregando (3) e sinal de que o play foi aceito; parado,
+         pausado ou sem resposta e que o iPhone recusou */
+      if (videoAtivo === pl && pl.estado !== 1 && pl.estado !== 3) modoManual(pl);
+    }, 3500);
+  });
+
+  /* o replay do proprio YouTube nao aceita toque (o iframe nao recebe
+     clique): no fim do video aparece o nosso */
+  caixa.querySelector('.rever').addEventListener('click', function(){
+    pl.terminou = false;
+    pl.caixa.classList.remove('fim', 'meio');
+    if (pl.barra) pl.barra.style.width = '0';
+    elBtnFixo.classList.remove('pisca');
+    mandaPra(pl, 'seekTo', [0, true]);
+    mandaPra(pl, 'playVideo');
+    track('VideoRever', { id: pl.v.id });
+  });
+
+  PLAYERS[chave] = pl;
+  return pl;
+}
+
+/* um de cada vez, com folga entre eles: quatro players subindo ao mesmo
+   tempo numa rede de celular disputam banda e atrasam justo o primeiro, que
+   e o unico que a pessoa ve nos proximos segundos */
+function aquecePlayers(){
+  ORDEM_VIDEOS.forEach(function(chave, i){
+    setTimeout(function(){ criaPlayer(chave); }, 400 + i * 2600);
+  });
+}
+
+/* "listening" faz o iframe mandar o estado de volta. Toda recarga do iframe
+   zera isso, entao o aperto de mao roda de novo a cada carga. Enquanto o
+   player nao disser que comecou, o play e reenviado: um play mandado antes
+   de o iframe estar pronto se perde, e no celular isso deixava o video parado. */
+function escuta(pl){
+  var n = 0;
+  clearInterval(pl.hs);
+  pl.hs = setInterval(function(){
+    try { pl.iframe.contentWindow.postMessage(JSON.stringify({ event:'listening', id:'yt' }), '*'); } catch(e){}
+    mandaPra(pl, 'unloadModule', ['captions']);
+    mandaPra(pl, 'unloadModule', ['cc']);
+    var parado = pl.estado === undefined || pl.estado === -1 || pl.estado === 5;
+    if (videoAtivo === pl && parado && !pl.manual) mandaPra(pl, 'playVideo');
+    if (++n > 16) clearInterval(pl.hs);
+  }, 500);
+  clearInterval(pl.cc);
+  pl.cc = setInterval(function(){
+    if (videoAtivo !== pl) { clearInterval(pl.cc); return; }
+    mandaPra(pl, 'unloadModule', ['captions']);
+    mandaPra(pl, 'unloadModule', ['cc']);
+  }, 1500);
+}
+
+/* iPhone: o som ligado de fora do player pode ser recusado, e o video fica
+   parado sem dar para tocar nele. Aqui o player do YouTube volta com o play
+   dele a mostra e aceita o toque, que e o gesto que o iPhone exige. */
+function modoManual(pl){
+  if (pl.manual) return;
+  pl.manual = true;
+  pl.estado = undefined;
+  pl.caixa.classList.add('manual');
+  pl.som.classList.add('hide');
+  pl.iframe.src = 'https://www.youtube-nocookie.com/embed/' + pl.v.id + '?' +
+    PARAMS_VIDEO.replace('mute=1', 'mute=0').replace('controls=0', 'controls=1') + '&autoplay=1&start=0';
+  escuta(pl);
+  track('VideoManual', { id: pl.v.id });
+}
+
+function fimDoVideo(pl){
+  if (pl.terminou) return;
+  pl.terminou = true;
+  if (pl === videoAtivo && state.liberaVideo) state.liberaVideo();
+  clearInterval(pl.hs);
+  pl.caixa.classList.add('fim');
+  elBtnFixo.classList.add('pisca');
+  if (!pl.som.classList.contains('hide')) {
+    var t = pl.som.querySelector('.faixa span:last-child');
+    if (t) t.textContent = 'Toque para ver com som';
+  }
+  track('VideoFim', { id: pl.v.id });
+}
+
+/* Para receber o fim do video nao e preciso carregar a biblioteca do
+   YouTube: basta mandar um "listening" pro iframe e ele passa a postar os
+   eventos de volta. Quando o playerState vira 0, o video acabou. Se a
+   resposta nao vier, nada quebra: o botao Continuar segue funcionando. */
+window.addEventListener('message', function(e){
+  if (!/youtube/.test(e.origin)) return;
+  var d = e.data;
+  try { if (typeof d === 'string') d = JSON.parse(d); } catch(err){ return; }
+  if (!d) return;
+  /* a mensagem pode vir de qualquer um dos quatro players: e.source diz de
+     qual, e so o que esta na tela e que manda no botao Continuar */
+  var pl = null;
+  for (var k in PLAYERS) {
+    if (PLAYERS[k].iframe && PLAYERS[k].iframe.contentWindow === e.source) { pl = PLAYERS[k]; break; }
+  }
+  if (!pl) return;
+  var info = d.info;
+  /* o player manda o proprio estado de mudo de volta: e por aqui que a
+     gente sabe que o unMute pegou e nao precisa recarregar */
+  if (info && typeof info === 'object' && info.muted === false) pl.desmutou = true;
+  var estado = (info && typeof info === 'object') ? info.playerState : info;
+  if (typeof estado === 'number') pl.estado = estado;
+  /* tempo e duracao chegam no mesmo infoDelivery: e deles que sai a barrinha */
+  if (info && typeof info === 'object') {
+    if (info.duration) pl.dur = info.duration;
+    if (typeof info.currentTime === 'number' && pl.dur && pl.barra && !SEM_BARRA[pl.chave]) {
+      var fr = Math.min(1, info.currentTime / pl.dur);
+      pl.caixa.classList.toggle('meio', fr >= .5);
+      pl.barra.style.width = (fr * 100).toFixed(1) + '%';
+    }
+  }
+  if (estado === 0 && pl === videoAtivo) fimDoVideo(pl);
+});
+
+function telaVideo(p){
+  var pl = criaPlayer(p.k);
+  var v = VIDEOS[p.k];
+  if (!v) { proximo(); return; }
+
+  elTela.innerHTML =
+    '<div class="tela-video">' +
+    '<h2>' + esc(v.titulo) + '</h2>' +
+    /* video sem subtitulo nao deixa um paragrafo vazio ocupando altura */
+    (v.texto ? '<p class="peq">' + esc(v.texto) + '</p>' : '') +
+    '</div>';
+
+  /* Nenhum link para fora daqui. Levar a pessoa pro YouTube e perder o
+     quiz: ela cai no feed e nao volta. Se o video nao carregar, o botao
+     Continuar segue funcionando e ela nao trava.
+     O Continuar vive na barra fixa do rodape, nao no fim da rolagem: com o
+     player alto ele caia atras da barra do navegador no celular. */
+  elFixo.classList.remove('hide');
+  document.body.classList.add('com-barra');
+  document.body.classList.add('tela-de-video');
+  elBtnFixo.textContent = 'Continuar';
+  elBtnFixo.onclick = proximo;
+
+  if (!pl) { elVideos.classList.add('hide'); return; }
+
+  /* 16/10: o Continuar so libera depois de alguns segundos, com a contagem
+     a mostra pra ninguem achar que travou. Se o video acabar antes, libera. */
+  state.videosLiberados = state.videosLiberados || {};
+  var segura = state.videosLiberados[p.k] ? 0 : (CFG.VIDEO_SEGURA_S || 0);
+  clearInterval(state.tSegura);
+  state.liberaVideo = function(){
+    clearInterval(state.tSegura);
+    state.videosLiberados[p.k] = 1;
+    elBtnFixo.disabled = false;
+    elBtnFixo.textContent = 'Continuar';
+  };
+  if (segura > 0) {
+    elBtnFixo.disabled = true;
+    elBtnFixo.textContent = 'Continuar em ' + segura + 's';
+    state.tSegura = setInterval(function(){
+      segura--;
+      if (segura <= 0) state.liberaVideo();
+      else elBtnFixo.textContent = 'Continuar em ' + segura + 's';
+    }, 1000);
+  } else state.liberaVideo();
+
+  elVideos.classList.remove('hide');
+  ORDEM_VIDEOS.forEach(function(k){
+    if (PLAYERS[k]) PLAYERS[k].caixa.classList.toggle('on', k === p.k);
+  });
+
+  /* revendo o mesmo video, ele recomeca do zero e volta a valer a regra do
+     fim de video */
+  pl.terminou = false;
+  pl.caixa.classList.remove('fim');
+  pl.som.classList.remove('hide');
+  var rot = pl.som.querySelector('.faixa span:last-child');
+  if (rot) rot.textContent = 'Toque para ouvir';
+  elBtnFixo.classList.remove('pisca');
+
+  videoAtivo = pl;
+  if (pl.manual) { pl.som.classList.add('hide'); }
+  else { mandaPra(pl, 'seekTo', [0, true]); mandaPra(pl, 'playVideo'); }
+  /* cc_load_policy=0 so impede a legenda de vir ligada por padrao; o
+     escuta() tambem descarrega o modulo de legenda, que e o que tira de vez */
+  escuta(pl);
+
+  /* sair da tela nao destroi o player: ele so pausa e some. Assim a volta
+     e instantanea e nada fica tocando escondido gastando dado. */
+  state.limpaVideo = function(){
+    clearInterval(pl.hs);
+    clearTimeout(pl.tSom);
+    clearTimeout(pl.tManual);
+    clearInterval(state.tSegura);
+    clearInterval(pl.cc);
+    state.liberaVideo = null;
+    elBtnFixo.disabled = false;
+    mandaPra(pl, 'pauseVideo');
+    pl.caixa.classList.remove('on');
+    elVideos.classList.add('hide');
+    document.body.classList.remove('tela-de-video');
+    elBtnFixo.classList.remove('pisca');
+    videoAtivo = null;
+  };
+
+  track('VideoView', { id: v.id });
+}
+
+
+/* ---------- insercao ---------- */
+function telaRespiro(p){
+  var r = p.r;
+  elTela.innerHTML =
+    '<div class="insercao">' +
+      '<span class="dado">' + esc(r.dado) + '</span>' +
+      /* 16/10: o dado em figura. So a barra de hoje e a seta subindo: sem o
+         valor de antes, uma segunda barra seria comparacao sem dado */
+      (r.alta ? '<div class="mg" aria-hidden="true">' +
+        '<svg class="mg-seta" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 38 L22 24 L29 31 L40 18" ' +
+          'fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '<path d="M30 16 H42 V28" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" ' +
+          'stroke-linejoin="round"/></svg>' +
+        '<div class="mg-col"><div class="mg-area"><div class="mg-bar hoje" data-h="100"><span>' + esc(r.dado) + '</span></div></div>' +
+          '<small>Custo por mil impressões</small></div>' +
+        '</div>' : '') +
+      '<p class="peq">' + esc(r.texto) + '</p>' +
+      (r.fonte ? '<p class="fonte">' + esc(r.fonte) + '</p>' : '') +
+      '<p><b>' + esc(r.reenquadre) + '</b></p>' +
+    '</div>' +
+    '<p class="peq">' + esc(r.gancho) + '</p>' +
+    '<button class="btn" id="segue" type="button">Continuar</button>';
+  document.getElementById('segue').addEventListener('click', proximo);
+  /* as barras sobem depois de pintadas, uma depois da outra */
+  [].forEach.call(elTela.querySelectorAll('.mg-bar'), function(b, i){
+    setTimeout(function(){ b.style.height = b.dataset.h + '%'; b.classList.add('on'); }, 150 + i * 450);
+  });
+}
+
+/* ---------- loading: o circulo ---------- */
+function telaLoading(p){
+  var plano = p.qual === 'plano';
+  var frases = plano
+    ? ['Montando o seu plano...', 'Separando a estrutura do seu quiz...', 'Quase lá...']
+    : ['Cruzando as suas ' + TOTAL_PERGUNTAS + ' respostas...', 'Comparando com quizzes no ar...', 'Fechando o diagnóstico...'];
+  elTela.innerHTML =
+    '<h2 style="text-align:center">' + (plano ? 'Preparando o seu plano' : 'Montando o seu diagnóstico') + '</h2>' +
+    '<svg class="orbita" viewBox="0 0 212 212" aria-hidden="true">' +
+      '<circle cx="106" cy="106" r="84" fill="none" stroke="#1B2A1E" stroke-width="10"/>' +
+      '<g class="arco"><circle cx="106" cy="106" r="84" fill="none" stroke="#FFD200" ' +
+        'stroke-width="10" stroke-linecap="round" stroke-dasharray="150 378"/></g>' +
+      '<text class="meio" x="106" y="118" text-anchor="middle" id="pc">0%</text>' +
+    '</svg>' +
+    '<div class="load-bar"><i id="lb"></i></div>' +
+    '<p class="load-txt" id="lt">' + esc(frases[0]) + '</p>';
+
+  var lb = document.getElementById('lb'), lt = document.getElementById('lt'), pc = document.getElementById('pc');
+  var v = 0, passo = 0;
+  var t = setInterval(function(){
+    v = Math.min(100, v + Math.round(6 + Math.random() * 9));
+    lb.style.width = v + '%';
+    pc.textContent = v + '%';
+    var novo = v < 40 ? 0 : (v < 78 ? 1 : 2);
+    if (novo !== passo) { passo = novo; lt.textContent = frases[passo]; }
+    if (v >= 100) { clearInterval(t); setTimeout(proximo, 480); }
+  }, 260);
+}
+
+/* ---------- resultado: os quatro aneis ---------- */
+function telaResultado(){
+  state.score = computeScores();
+  var s = state.score;
+  var frase = {
+    trafego:      'Você paga por cada lead, e ele não diz nada sobre si',
+    mesa:         'O cliente que mais compraria de você está passando batido',
+    qualificacao: 'Chega lead. O lead certo é que não chega',
+    execucao:     'Você sabe o que fazer, e não é o tempo que falta'
+  }[s.top];
+
+  /* 16/10: o diagnostico em linguagem simples. O ponto que mais pesa vem
+     grande, com o que ele quer dizer; os outros tres em barras, do maior para
+     o menor, cada um com uma etiqueta e uma frase. Tudo enche e conta na hora. */
+  var topo = s.rank[0], nt = nivelDiag(s.pct[topo]);
+  elTela.innerHTML =
+    '<span class="selo"><i></i> Seu diagnóstico</span>' +
+    '<h2>' + esc(frase) + '</h2>' +
+    '<p class="peq">Pelas suas ' + TOTAL_PERGUNTAS + ' respostas, este é o ponto que mais pesa na sua captação:</p>' +
+    '<div class="diag">' +
+      '<div class="d-top n' + nt + '">' +
+        '<span class="d-tag">' + (nt === 0 ? '&#9888; Seu ponto mais crítico' : 'O ponto que mais pesa') + '</span>' +
+        '<div class="d-linha"><span class="d-emo">' + AREAS[topo].emoji + '</span>' +
+          '<span class="d-nome">' + esc(AREAS[topo].nome) + '</span>' +
+          '<b class="d-pct" data-n="' + s.pct[topo] + '">1%</b></div>' +
+        '<div class="d-barra"><i data-w="' + s.pct[topo] + '"></i></div>' +
+        '<p class="d-frase"><b>' + esc(DIAG_FRASE[topo][nt]) + '.</b> ' + esc(DIAG_SIGNIFICA[topo]) + '</p>' +
+      '</div>' +
+      '<div class="d-outros">' +
+        s.rank.slice(1).map(function(k){
+          var v = s.pct[k], n = nivelDiag(v);
+          return '<div class="d-it n' + n + '">' +
+            '<div class="d-linha"><span class="d-emo">' + AREAS[k].emoji + '</span>' +
+              '<span class="d-nome">' + esc(AREAS[k].nome) + '</span>' +
+              '<span class="chip">' + NIVEL_DIAG[n] + '</span>' +
+              '<b data-n="' + v + '">1%</b></div>' +
+            '<div class="d-barra"><i data-w="' + v + '"></i></div>' +
+            '<p class="d-curta">' + esc(DIAG_FRASE[k][n]) + '</p>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+      '<p class="d-nota">Quanto maior o número, mais esse ponto pesou nas suas respostas.</p>' +
+    '</div>' +
+    '<div class="nivel">O problema não é o tráfego. O quiz também roda com tráfego. ' +
+      'O que muda é <em>a forma de captar</em>: quem responde vinte perguntas antes de ' +
+      'falar com você chega de outro jeito, e é essa gente que hoje está ficando na mesa.</div>' +
+    '<button class="btn" id="segue" type="button">Ver o que fazer com isso</button>';
+
+  /* as barras enchem uma depois da outra e o numero sobe junto (comeca em 1%,
+     nunca em 0%); o cartao de cima pulsa quando termina */
+  var calmo = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  [].forEach.call(elTela.querySelectorAll('.diag [data-w]'), function(b, i){
+    setTimeout(function(){ b.style.width = b.dataset.w + '%'; }, calmo ? 0 : 120 + i * 220);
+  });
+  [].forEach.call(elTela.querySelectorAll('.diag [data-n]'), function(el, i){
+    var alvo = +el.dataset.n;
+    if (calmo) { el.textContent = alvo + '%'; return; }
+    setTimeout(function(){
+      var t0 = null;
+      (function passo(ts){
+        if (t0 === null) t0 = ts;
+        var pr = Math.min(1, (ts - t0) / 1000);
+        el.textContent = Math.max(1, Math.round(alvo * (1 - Math.pow(1 - pr, 3)))) + '%';
+        if (pr < 1) requestAnimationFrame(passo);
+      })(performance.now());
+      setTimeout(function(){ el.textContent = alvo + '%'; }, 1150);
+    }, 120 + i * 220);
+  });
+  setTimeout(function(){ var c = elTela.querySelector('.d-top'); if (c) c.classList.add('on'); }, calmo ? 0 : 1300);
+
+  track('Resultado', { nivel:s.nivel, geral:s.geral, segmento:s.segmento });
+  document.getElementById('segue').addEventListener('click', proximo);
+}
+
+/* =====================================================================
+   8. AS CINCO TELAS DE PROVA
+   ===================================================================== */
+function provaBase(selo, titulo, corpo, botao){
+  elTela.innerHTML =
+    '<span class="selo"><i></i> ' + esc(selo) + '</span>' +
+    '<h2>' + esc(titulo) + '</h2>' + corpo +
+    '<button class="btn" id="segue" type="button">' + esc(botao || 'Continuar') + '</button>';
+  document.getElementById('segue').addEventListener('click', proximo);
+}
+
+function prova1(){
+  var numeros = (CFG.PROVA_NUMEROS || []);
+  /* 16/10, pedido do Carlos: a foto do Ricardo com o Pablo e o numero do case
+     em destaque, pra dar autoridade no meio do quiz */
+  var corpo = numeros.length
+    ? '<figure class="prova-foto"><img src="/img/case-pablo-ricardo.webp?v=26" ' +
+        'alt="Ricardo Castro e Pablo Marçal" width="1000" height="667"></figure>' +
+      '<div class="caixa prova-num">' + numeros.map(function(x, i){
+        return '<div' + (i === 0 ? ' class="destaque"' : '') + '><b>' + esc(x.n) + '</b>' +
+          '<p class="peq">' + esc(x.txt) + '</p>' +
+          (x.fonte ? '<p class="fonte-num">' + esc(x.fonte) + '</p>' : '') + '</div>';
+      }).join('') + '</div>'
+    : '<div class="caixa"><p>Um quiz bem montado não é uma pesquisa com cara de marketing. ' +
+      'Ele é a única peça do seu funil em que <b>o lead trabalha a seu favor</b>: ele ' +
+      'responde, se classifica e entrega o contexto que o seu time levaria uma call ' +
+      'inteira pra descobrir.</p>' +
+      '<p class="peq">Cada resposta que ele dá é um dado que a sua oferta usa depois. ' +
+      'Nenhum outro formato de captação faz isso.</p></div>';
+  /* 16/10: titulo e texto pedidos no chat */
+  if (numeros.length) corpo += '<p>O método nasceu desse funil, no modelo original. A Revolução do ' +
+    'Quiz é a evolução dele: a mesma lógica, com a estrutura organizada em 9 fases e um ' +
+    'diagnóstico mais personalizado.</p>';
+  provaBase('Isso funciona mesmo?', 'De onde vem esse método?', corpo);
+}
+
+function prova2(){
+  var neg = state.resp.P11;
+  var meu = ['mentoria e programa de acompanhamento','lançamento','operação montada para terceiros','produto digital'][neg] || 'operação';
+  provaBase('Funciona no meu mercado?',
+    'Não é sobre o nicho. É sobre a ordem das perguntas.',
+    '<p>Você marcou que a sua operação é de <b>' + esc(meu) + '</b>. A engenharia não muda ' +
+    'com o nicho: o que muda é o vocabulário das opções. E a mesma peça serve para os ' +
+    'dois jeitos de vender: <b>rodando perpétuo</b>, captando todo dia, ou ' +
+    '<b>vendendo ingresso de lançamento</b>, com a mesma estrutura e outro destino no fim.</p>' +
+    '<ul class="lista">' +
+      '<li><i>1</i>A dor é sempre fato, depois emoção, depois perda.</li>' +
+      '<li><i>2</i>A crença vira confissão, não aula.</li>' +
+      '<li><i>3</i>A objeção de identidade tem bloco próprio, antes da oferta.</li>' +
+      '<li><i>4</i>O contato é pedido por último, depois de um sim.</li>' +
+    '</ul>' +
+    '<p class="peq">Um quiz de emagrecimento e um de mentoria de alto ticket usam a mesma ' +
+    'engrenagem. Trocam as palavras, não a ordem.</p>');
+}
+
+function prova3(){
+  var imp = state.resp.P23;
+  var dele = ['não saber montar','não ter tempo de estruturar','não saber o que perguntar','começar e não terminar'][imp] || 'o impedimento que você marcou';
+  provaBase('Por que não deu certo quando eu tentei?',
+    'Se você já fez quiz e não teve resultado, você fez do jeito antigo.',
+    '<div class="ab">' +
+      '<div class="lb ruim"><h4>O jeito antigo</h4><ul class="lista dor">' +
+        '<li><i>&times;</i>Começa com botão de "começar", e perde gente antes da primeira resposta.</li>' +
+        '<li><i>&times;</i>Pergunta emoção cedo demais, e recebe resposta defensiva.</li>' +
+        '<li><i>&times;</i>Pede o contato no meio, antes de haver motivo pra dar.</li>' +
+        '<li><i>&times;</i>Entrega resultado genérico, igual pra todo mundo.</li>' +
+      '</ul></div>' +
+      '<div class="lb bom"><h4>A Revolução do Quiz</h4><ul class="lista">' +
+        '<li><i>&#10003;</i>A capa já é a primeira pergunta.</li>' +
+        '<li><i>&#10003;</i>IA para montar, ajustar e testar o que antes levava semanas.</li>' +
+        '<li><i>&#10003;</i>Fato, emoção e perda, nessa ordem.</li>' +
+        '<li><i>&#10003;</i>Contato só no fim, depois de um sim.</li>' +
+        '<li><i>&#10003;</i>Resultado que devolve o que a pessoa mesma disse.</li>' +
+      '</ul></div>' +
+    '</div>' +
+    '<p class="peq">Você marcou que o seu impedimento é <b>' + esc(dele) + '</b>. ' +
+    'Nenhum dos quatro erros acima se resolve com mais esforço.</p>');
+}
+
+function prova4(){
+  var v = state.resp.P7;
+  var faixa = ['menos de R$ 10 mil','de R$ 10 mil a R$ 30 mil','de R$ 30 mil a R$ 100 mil','mais de R$ 100 mil'][v] || 'o que você investe';
+  provaBase('Quanto custa pra rodar?',
+    'A captação pode sair de graça',
+    '<p>Você investe <b>' + esc(faixa) + '</b> por mês em anúncio, e vai continuar ' +
+    'investindo. O quiz não troca o tráfego: ele roda com o mesmo tráfego.</p>' +
+    '<div class="caixa">' +
+      '<p><b>O que muda é o fim do caminho.</b> Em vez de o clique acabar num cadastro, ' +
+      'ele acaba em alguém que respondeu vinte perguntas e comprou um low ticket, ou ' +
+      'comprou o ingresso do seu lançamento.</p>' +
+      '<p class="peq">A partir do momento em que essa venda empata com o custo da ' +
+      'campanha, <em>a captação saiu de graça</em>. Você não pagou pelo lead: ele pagou ' +
+      'pra entrar, e entrou dizendo quem é.</p>' +
+    '</div>' +
+    '<p class="peq">Não é promessa de retorno. É a mudança de quem paga a conta da ' +
+    'captação.</p>');
+}
+
+function prova5(){
+  var pr = state.resp.P22;
+  var prazo = ['nos próximos 30 dias','em 3 meses','em 6 meses','em um ano'][pr] || 'no prazo que você marcou';
+  provaBase('Quanto tempo leva?',
+    'Você disse ' + prazo + '. Dá pra começar hoje.',
+    '<p>O que leva tempo em um quiz não é montar a página. É <b>decidir o que perguntar ' +
+    'e em que ordem</b>. Essa parte já está pronta, e é ela que a gente entrega.</p>' +
+    '<ul class="lista">' +
+      '<li><i>&#10003;</i>A estrutura das 9 fases, na ordem que funciona.</li>' +
+      '<li><i>&#10003;</i>O banco de perguntas, pra você escolher em vez de inventar.</li>' +
+      '<li><i>&#10003;</i>A página pronta, pra publicar.</li>' +
+    '</ul>' +
+    '<p class="peq">Com a estrutura na mão, o que sobra é preencher. Isso é questão de ' +
+    'minutos, não de meses.</p>', 'Falta uma pergunta');
+}
+
+/* =====================================================================
+   9. CAPTURA
+   ===================================================================== */
+function soDigitos(s){ return String(s).replace(/\D+/g, ''); }
+function mascaraTel(s){
+  var d = soDigitos(s).slice(0, 11);
+  if (d.length <= 2) return d.length ? '(' + d : '';
+  if (d.length <= 6) return '(' + d.slice(0,2) + ') ' + d.slice(2);
+  if (d.length <= 10) return '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+  return '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7);
+}
+function emailValido(s){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(s).trim()); }
+
+function telaForm(){
+  elTela.innerHTML =
+    '<span class="selo"><i></i> Última etapa</span>' +
+    '<h2>Pra onde eu mando o seu diagnóstico completo e a estrutura do seu quiz?</h2>' +
+    '<p class="peq">Você respondeu ' + TOTAL_PERGUNTAS + ' perguntas e abriu ' +
+      state.presentes.length + ' presentes. ' +
+      'Agora eu preciso saber pra quem eu entrego tudo isso.</p>' +
+    '<div class="campo" id="cNome"><label for="inNome">Seu nome</label>' +
+      '<input id="inNome" type="text" placeholder="Nome e sobrenome" autocomplete="name" value="' + esc(state.nome) + '">' +
+      '<div class="msg">Escreva o seu nome pra personalizar o diagnóstico.</div></div>' +
+    '<div class="campo" id="cWhats"><label for="inWhats">Seu WhatsApp</label>' +
+      '<input id="inWhats" type="tel" inputmode="numeric" placeholder="(00) 00000-0000" autocomplete="tel" value="' + esc(state.whats) + '">' +
+      '<div class="msg">Escreva um WhatsApp válido, com DDD.</div></div>' +
+    '<div class="campo" id="cEmail"><label for="inEmail">Seu e-mail</label>' +
+      '<input id="inEmail" type="email" inputmode="email" placeholder="seuemail@exemplo.com" autocomplete="email" value="' + esc(state.email) + '">' +
+      '<div class="msg">Escreva um e-mail válido pra receber o plano.</div></div>' +
+    '<div class="cadeado"><span>&#128274;</span><span>Seus dados vão só pro seu plano. ' +
+      '<b>Nada de lista de disparo</b>, e você pode pedir remoção quando quiser.</span></div>' +
+    '<button class="btn" id="enviar" type="button" style="margin-top:14px">Receber o meu plano</button>' +
+    '<p class="privacidade">Leva menos de 10 segundos.</p>';
+
+  var inTel = document.getElementById('inWhats');
+  inTel.addEventListener('input', function(){ inTel.value = mascaraTel(inTel.value); });
+
+  document.getElementById('enviar').addEventListener('click', function(){
+    var nome  = document.getElementById('inNome').value.trim();
+    var whats = soDigitos(inTel.value);
+    var email = document.getElementById('inEmail').value.trim();
+    var erros = 0;
+    function marca(id, ruim){
+      document.getElementById(id).classList.toggle('erro', ruim);
+      if (ruim) erros++;
+    }
+    marca('cNome',  nome.length < 2);
+    marca('cWhats', whats.length < 10 || whats.length > 11);
+    marca('cEmail', !emailValido(email));
+    if (erros) { toast('Faltou preencher ' + (erros > 1 ? 'alguns campos' : 'um campo')); return; }
+
+    state.nome = nome; state.whats = whats; state.email = email;
+    var s = state.score || computeScores();
+    /* o Lead vai uma vez por sessao: dois toques no botao, ou voltar e
+       mandar de novo, nao viram dois leads no Pixel */
+    var jaFoi = false;
+    try { jaFoi = sessionStorage.getItem('qq_lead') === '1'; sessionStorage.setItem('qq_lead', '1'); } catch(e){ jaFoi = !!state.leadFoi; }
+    state.leadFoi = true;
+    if (!jaFoi) {
+      /* correspondencia avancada: o Pixel criptografa antes de enviar */
+      if (window.fbq && ok(CFG.META_PIXEL_ID)) {
+        try { window.fbq('init', CFG.META_PIXEL_ID, { em: email.toLowerCase(), ph: '55' + whats,
+          fn: (nome.split(/\s+/)[0] || '').toLowerCase() }); } catch(e){}
+      }
+      track('Lead', {
+        nome: nome, email: email, whatsapp: whats,
+        nivel: s.nivel, geral: s.geral, segmento: s.segmento,
+        negocio: state.resp.P11, quando: state.resp.P25,
+        respostas: state.resp, multiplas: state.multi
+      });
+    }
+    rastreia('lead', { score: s.geral, nivel: s.nivel, gargalo: (AREAS[s.top] || {}).nome || '',
+      contato: { nome: nome, email: email, whatsapp: whats }, utm: UTM });
+    enviaCRM('cadastro');
+    proximo();
+  });
+}
+
+/* =====================================================================
+   10. OFERTA
+   ===================================================================== */
+var PILARES = [
+  ['Entrada','"Isso é pra mim, e é fácil de responder."','A capa já é a primeira pergunta. Sem ela, o lead desiste antes do primeiro compromisso.'],
+  ['Dor','"Isso me custa caro, e a causa não é falta de esforço."','Fato, emoção e perda, nessa ordem. Fora de ordem, ele responde na defensiva.'],
+  ['Crenças','"O problema tem nome, e eu mesmo confessei."','Cada resposta é uma confissão dele. Sem esse bloco, o diagnóstico vira opinião sua.'],
+  ['Identidade','"Posso querer isso sem trair quem eu sou."','A barreira que apareceria na hora de comprar é resolvida antes, como herança.'],
+  ['Possibilidade','"Eu posso mudar, e já imagino em quanto tempo."','O prazo que ele escolhe vira a régua contra o prazo do produto.'],
+  ['Diagnóstico','"Está confirmado, é assim comigo."','O resultado devolve o que ele mesmo disse. Confirmar convence mais do que medir.'],
+  ['Prova e promessa','"Existe saída, e funciona com gente como eu."','Uma dúvida por tela, no momento em que ela nasce. Prova fora de hora não pesa.'],
+  ['Captura','"Entrego meu contato para receber o plano."','Só no fim, depois de espera e de um sim. Pedir cedo é recusa antes de haver motivo.'],
+  ['Oferta','"Comprar é o próximo passo natural."','A página espelha o quiz: nome, vocabulário, dores marcadas e objeção respondida.']
+];
+
+/* As linhas do comparativo. Sao as dimensoes que separam uma landing de um
+   funil de quiz, e nao o desempenho de uma contra a outra: comparar numero
+   com numero exigiria numero real dos dois lados, e a casa nao inventa. */
+/* O comparativo em barra. Cada linha mede uma coisa CONTAVEL dos dois
+   funis, nao uma promessa de conversao, e o proprio quiz diz de onde sai o
+   numero.
+
+   Nenhuma barra encosta em 0% ou 100%, de proposito: barra na ponta parece
+   numero redondo inventado e o leitor para de acreditar no bloco inteiro.
+   Por isso o teto de cada linha e uma coisa que NENHUM dos dois lados
+   alcanca. Nas linhas 2 e 4 o teto e o mesmo: 30 pontos que decidem uma
+   venda, que sao as 26 informacoes que este quiz coleta mais 4 que so a
+   conversa revela (orcamento aprovado, quem decide, prazo do contrato e
+   urgencia real). Por isso 3 + 27 = 30 e 26 + 4 = 30: as duas linhas sao
+   as duas metades da mesma conta.
+
+   Se um dia a casa tiver numero medido de campanha, e aqui que ele entra. */
+var COMPARA = [
+  ['Níveis de consciência que a página alcança',
+   'na escala de 5 níveis, do inconsciente ao decidido',
+   40, '2 de 5', 80, '4 de 5'],
+  ['O que você sabe do lead antes da conversa',
+   'de 30 pontos que decidem uma venda',
+   10, '3 de 30', 87, '26 de 30'],
+  ['Onde ele se compromete antes de deixar o contato',
+   'de 26 toques que este quiz oferece',
+   4, '1 de 26', 88, '23 de 26'],
+  ['Descoberta que sobra pra primeira conversa',
+   'dos mesmos 30 pontos que decidem a venda',
+   90, '27 de 30', 13, '4 de 30']
+];
+
+var ETAPAS = [
+  ['1. O anúncio','Ele ainda não te conhece','Você paga por cada clique, e o clique chega frio. É o pedaço mais caro do funil e o único que não melhora sozinho.'],
+  ['2. Ele abre o quiz','O primeiro toque já é resposta','Não tem botão de começar. A capa é pergunta, então o compromisso acontece antes de ele sentir esforço.'],
+  ['3. Ele responde, e se qualifica','Cada resposta filtra quem ele é','Não é você adivinhando com quem está falando: é ele dizendo, pergunta por pergunta, o que quer e o que trava.'],
+  ['4. Ele deixa o contato','Depois de investir tempo, sair custa caro','O contato vem no fim, e vem junto com tudo que ele respondeu. Você sabe quem é antes de falar.'],
+  ['5. Ele compra','A oferta fala a língua que ele usou','A página devolve as palavras dele. Não parece oferta, parece conclusão.']
+];
+
+/* 16/10: saiu "As 14 Regras" (o titulo nao dizia regra de que). Os tres que
+   ficam caem cada um onde o percurso pede por ele; o terceiro campo e a frase
+   que liga o presente ao que a pessoa acabou de ver. */
+var BONUS = [
+  ['O Banco de Perguntas do Quiz','De 100 a 120 perguntas prontas, organizadas pelas 9 fases, com as opções já escritas e a adaptação para mentoria, lançamento e serviço.',
+   'Você acabou de ver como a pergunta certa faz o lead reconhecer o próprio problema. Aqui estão as perguntas prontas.'],
+  ['O Quiz de Referência, Tela por Tela','As 47 telas de um quiz real no ar, na ordem, com print e a nota do que quebraria se aquela tela saísse.',
+   'Para você ver um quiz de verdade funcionando, tela por tela, antes de montar o seu.'],
+  ['O Prompt Perfeito do Quiz','Um prompt só, pronto pra colar. Você preenche seis campos no topo e ele monta a estrutura do seu quiz.',
+   'Logo de cara, o atalho: com ele a estrutura do seu quiz sai pronta, sem começar do zero.']
+];
+
+
+/* A roda dos 9 pilares: os nove em volta, o numero no meio e a linha
+   girando por cima do anel. Mesmo desenho do mapa de areas da referencia. */
+/* nome curto so na roda: "Prova e promessa" encosta no vizinho ali.
+   A lista embaixo continua com o nome inteiro. */
+var PIL_CURTO = ['Entrada','Dor','Crenças','Identidade','Possibilidade',
+                 'Diagnóstico','Prova','Captura','Oferta'];
+var PIL_ICONE = [
+  '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>',
+  '<path d="M12 20s-7-4.5-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.5-7 9-7 9z"/><path d="M12.5 8l-2 4h3l-2 4"/>',
+  '<path d="M21 12a8 8 0 1 1-3.2-6.4"/><path d="M8.5 12l2.5 2.5L17 8"/>',
+  '<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><circle cx="12" cy="10" r="2"/><path d="M8.6 16c.9-1.5 2-2.3 3.4-2.3s2.5.8 3.4 2.3"/>',
+  '<path d="M12 3v4"/><path d="M5.6 9.6 8.4 12.4"/><path d="M3 18h18"/><path d="M18.4 9.6 15.6 12.4"/><path d="M8 18a4 4 0 0 1 8 0"/>',
+  '<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4.5-5.5"/>',
+  '<circle cx="12" cy="9" r="5.5"/><path d="M9.5 9l2 2 3.5-3.5"/><path d="M8 14.5 7 21.5l5-2.8 5 2.8-1-7"/>',
+  '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7.5 9 6 9-6"/>',
+  '<path d="M3 11V4h7l11 11-7 7z"/><circle cx="7.4" cy="7.4" r="1.5"/>'
+];
+
+function svgRoda(){
+  var CX = 170, CY = 158, R = 114;
+  var nos = PILARES.map(function(p, i){
+    var ang = (-90 + i * (360 / PILARES.length)) * Math.PI / 180;
+    var x = CX + R * Math.cos(ang), y = CY + R * Math.sin(ang);
+    return '<g transform="translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')">' +
+      '<rect x="-19" y="-19" width="38" height="38" rx="12" fill="#131C14" stroke="#27332A"/>' +
+      '<g transform="translate(-10.5,-10.5) scale(.88)" fill="none" stroke="#FFD200" ' +
+        'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + PIL_ICONE[i] + '</g>' +
+      '<text y="33" font-family="Manrope,sans-serif" font-size="8.6" font-weight="800" ' +
+        'fill="#D7DCD7" text-anchor="middle">' + esc(PIL_CURTO[i] || p[0]) + '</text></g>';
+  }).join('');
+
+  return '<svg viewBox="0 0 340 330" role="img" aria-label="Os 9 pilares em roda">' +
+    '<defs><radialGradient id="miolo" cx="50%" cy="50%" r="50%">' +
+      '<stop offset="0" stop-color="#3A3008"/><stop offset="1" stop-color="#0D140E"/>' +
+    '</radialGradient></defs>' +
+    '<circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="none" stroke="#243026" stroke-width="2"/>' +
+    '<g class="orbita-pil"><circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="none" ' +
+      'stroke="#FFD200" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="330 386"/></g>' +
+    '<circle cx="' + CX + '" cy="' + CY + '" r="58" fill="url(#miolo)"/>' +
+    '<text x="' + CX + '" y="' + (CY + 8) + '" font-family="Sora,sans-serif" font-size="44" ' +
+      'font-weight="800" fill="#FFD200" text-anchor="middle">9</text>' +
+    '<text x="' + CX + '" y="' + (CY + 28) + '" font-family="Sora,sans-serif" font-size="10" ' +
+      'font-weight="600" letter-spacing="3" fill="#748076" text-anchor="middle">PILARES</text>' +
+    nos +
+    '<text x="' + CX + '" y="322" font-family="Sora,sans-serif" font-size="10.5" font-weight="600" ' +
+      'letter-spacing="1.4" fill="#FFD200" text-anchor="middle">A ORDEM QUE LEVA O LEAD ATÉ O FIM</text>' +
+  '</svg>';
+}
+
+function descontoPct(soma){
+  if (!soma || !CFG.PRECO_NUM) return 0;
+  return Math.max(0, Math.round((1 - CFG.PRECO_NUM / soma) * 100));
+}
+
+/* Relogio de 10 minutos. Ele nao fecha nada quando chega a zero: para em
+   00:00 e troca o rotulo. Se um dia a oferta tiver de expirar de verdade, e
+   aqui que a regra entra, e nao no texto. */
+function rodaTimer(){
+  var el = document.getElementById('rl');
+  if (!el) return;
+  var fim = Date.now() + (CFG.TIMER_MIN || 10) * 60000;
+  if (state.relogio) clearInterval(state.relogio);
+  function passo(){
+    var falta = Math.max(0, fim - Date.now());
+    var m = Math.floor(falta / 60000), sg = Math.floor(falta % 60000 / 1000);
+    el.textContent = m + ':' + (sg < 10 ? '0' : '') + sg;
+    if (falta <= 0) {
+      clearInterval(state.relogio);
+      var lb = el.previousElementSibling;
+      if (lb) lb.textContent = 'Última chamada';
+    }
+  }
+  passo();
+  state.relogio = setInterval(passo, 1000);
+}
+
+function fmt(n){ return 'R$ ' + n.toLocaleString('pt-BR'); }
+
+/* Funil em fatias separadas, cada uma com respiro entre elas, contorno fino
+   e preenchimento que so escurece pro fim. O desenho anterior era um trapezio
+   cheio com riscos atravessando: pesado e sem hierarquia. */
+var FUNIL = [
+  ['Anúncio',          'ele não te conhece'],
+  ['Abre o quiz',      'curioso'],
+  ['Responde',         'e se qualifica sozinho'],
+  ['Deixa o contato',  'você sabe quem ele é'],
+  ['Compra',           'cliente']
+];
+
+function svgFunil(){
+  var L = 340, topo = 18, alturaFatia = 62, respiro = 9;
+  var largoTopo = 300, largoBase = 128;
+  var n = FUNIL.length;
+  var alturaTotal = topo * 2 + n * alturaFatia + (n - 1) * respiro;
+  var corpo = '';
+
+  for (var k = 0; k < n; k++) {
+    var y = topo + k * (alturaFatia + respiro);
+    var a = largoTopo + (largoBase - largoTopo) * (k / n);
+    var b = largoTopo + (largoBase - largoTopo) * ((k + 1) / n);
+    var x1 = (L - a) / 2, x2 = (L - b) / 2;
+    var op = (0.05 + k * 0.045).toFixed(3);
+    corpo +=
+      '<path d="M' + x1.toFixed(1) + ' ' + y +
+        ' H' + (x1 + a).toFixed(1) +
+        ' L' + (x2 + b).toFixed(1) + ' ' + (y + alturaFatia) +
+        ' H' + x2.toFixed(1) + ' Z" ' +
+        'fill="rgba(255,210,0,' + op + ')" stroke="rgba(255,210,0,.34)" stroke-width="1"/>' +
+      '<text x="' + (L/2) + '" y="' + (y + 27) + '" text-anchor="middle" ' +
+        'font-family="Sora,sans-serif" font-size="14" font-weight="600" fill="#F2F0E6" ' +
+        'letter-spacing="-.3">' + esc(FUNIL[k][0]) + '</text>' +
+      '<text x="' + (L/2) + '" y="' + (y + 45) + '" text-anchor="middle" ' +
+        'font-family="Manrope,sans-serif" font-size="11" fill="#8B968C">' +
+        esc(FUNIL[k][1]) + '</text>';
+  }
+
+  return '<svg viewBox="0 0 ' + L + ' ' + alturaTotal + '" role="img" ' +
+    'aria-label="Funil: do anúncio até a compra">' + corpo + '</svg>';
+}
+
+function telaOferta(){
+  var sc = state.score || computeScores();
+  var nome = primeiroNome();
+  var nm = nome ? esc(nome) : 'Ei';
+  var topo = AREAS[sc.top].nome;
+  var neg = ['mentoria','lançamento','operação de cliente','produto digital'][state.resp.P11] || 'operação';
+  var dores = (state.multi.P9 || []).filter(function(i){ return i !== 5; })
+    .map(function(i){ return Q_MAP[9].opts[i][1]; });
+  var chamaCall = state.resp.P25 === 0;
+  var soma = CFG.VAL_METODO + (CFG.VAL_BONUS || []).reduce(function(a,b){ return a + b; }, 0);
+
+  var html = '';
+
+  /* ---- HERO ---- */
+  html += sec('meio',
+    '<div class="kick">🎯 O seu diagnóstico</div>' +
+    '<h2 class="sh">' + (nome ? 'Ei ' + nm + ', a ' : 'A ') + 'sua trava tem nome: ' +
+      '<span style="color:var(--yel)">' + esc(topo) + '</span>.</h2>' +
+    '<p class="sp">As suas 25 respostas mostraram onde o dinheiro para. O que vem agora ' +
+      'não é trocar o seu tráfego: é mudar a forma de captar, pra chegar até o cliente ' +
+      'que hoje passa batido.' +
+      (state.presentes.length ? ' Os seus ' + state.presentes.length + ' presentes, ' +
+        fmt(somaCofre()) + ' guardados, são resgatados no mesmo acesso.' : '') + '</p>');
+
+  /* ---- A. comparativo: a landing de sempre contra o funil de quiz ---- */
+  html += sec('',
+    '<div class="kick">Comparativo</div>' +
+    '<h3 class="sh">Não é a sua página com outra cara. É outro funil.</h3>' +
+    '<p class="sp">A landing fala com quem já está procurando o que você vende. ' +
+      'O quiz fala com quem ainda nem sabe que tem o problema, e leva essa pessoa até ' +
+      'o ponto de comprar. É uma fatia de público que a sua página não alcança hoje.</p>' +
+    '<div class="cmp">' + COMPARA.map(function(c){
+      function linha(classe, rotulo, pct, nota){
+        return '<div class="cmp-b ' + classe + '">' +
+          '<span class="cmp-r">' + esc(rotulo) + '</span>' +
+          '<span class="cmp-t"><i data-pct="' + pct + '"></i></span>' +
+          '<span class="cmp-v"><b data-n="' + pct + '">0%</b>' +
+            '<span>' + esc(nota) + '</span></span></div>';
+      }
+      return '<div class="cmp-l"><span class="t">' + esc(c[0]) + '</span>' +
+        '<span class="cmp-base">' + esc(c[1]) + '</span>' +
+        linha('hoje', 'A sua landing', c[2], c[3]) +
+        linha('quiz', 'Com o quiz',    c[4], c[5]) +
+        '</div>';
+    }).join('') + '</div>');
+
+  /* ---- B. antes e depois ---- */
+  html += sec('',
+    '<div class="kick">A sua virada</div>' +
+    '<h3 class="sh">' + (nome ? nm + ', v' : 'V') + 'ocê vai continuar fazendo tráfego. Muda o que acontece depois do clique.</h3>' +
+    '<div class="ba">' +
+      '<div class="ba-c ruim"><span class="ico">💸</span><span class="lb">Hoje</span>' +
+        '<small>Todo mundo chega igual: um clique sem nome. O bom cliente se perde no meio.</small></div>' +
+      '<div class="ba-seta">&#8594;</div>' +
+      '<div class="ba-c bom"><span class="ico">🎯</span><span class="lb">Com o quiz</span>' +
+        '<small>Mesmo anúncio, outro fim: ele responde, se identifica, e ainda paga a própria entrada.</small></div>' +
+    '</div>');
+
+  /* ---- C. projecao ---- */
+  html += sec('',
+    '<div class="kick">Projeção</div>' +
+    '<h3 class="sh">A diferença não é quantidade. É quem chega.</h3>' +
+    '<div class="chart">' + svgProjecao() + '</div>' +
+    '<p class="sp">A linha de baixo é o lead anônimo, que chega no mesmo volume e não ' +
+      'muda nada. A de cima é o lead que se apresentou antes de falar com você.</p>');
+
+  /* ---- D. o metodo: funil e os 9 pilares ---- */
+  html += sec('',
+    '<div class="kick">O método</div>' +
+    '<h3 class="sh">A jornada do lead, do clique caro até a compra</h3>' +
+    '<div class="funil">' + svgFunil() + '</div>' +
+    '<div id="etapas" style="display:flex;flex-direction:column;gap:9px">' +
+      ETAPAS.map(function(e){
+        return '<div class="etapa"><span class="marca"></span><div><b>' + esc(e[0]) + '</b>' +
+          '<i>' + esc(e[1]) + '</i><span>' + esc(e[2]) + '</span></div></div>';
+      }).join('') +
+    '</div>' +
+    '<div class="nivel">Se a venda do quiz empatar com o custo do anúncio, você já está ' +
+      'no lucro: o lead entrou na sua base a custo zero, e a próxima venda pra ele não ' +
+      'tem anúncio nenhum na frente.</div>');
+
+  html += sec('',
+    '<div class="kick">A engenharia</div>' +
+    '<h3 class="sh">Os 9 pilares de um quiz de alta conversão</h3>' +
+    '<div class="roda">' + svgRoda() +
+      '<div class="roda-pe"><b>Entenda a ordem que faz o lead chegar até o fim</b>' +
+      '<span>O mapa por trás de um quiz que converte.</span></div></div>' +
+    '<div id="pilares" style="display:flex;flex-direction:column;gap:10px">' +
+      PILARES.map(function(p, i){
+        return '<div class="pil-i"><div class="pil-n">' + (i+1) + '</div><div class="pil-tx">' +
+          '<b>' + esc(p[0]) + '</b><i>' + esc(p[1]) + '</i><span>' + esc(p[2]) + '</span>' +
+          '</div></div>';
+      }).join('') +
+    '</div>');
+
+  /* ---- D2. os dois usos: perpetuo e lancamento ---- */
+  html += sec('',
+    '<div class="kick">Os dois usos</div>' +
+    '<h3 class="sh">A mesma peça roda o ano inteiro e também vende ingresso</h3>' +
+    '<div class="ab">' +
+      '<div class="lb"><h4 style="color:var(--yel)">Perpétuo</h4><ul class="lista">' +
+        '<li><i>&#10003;</i>Fica no ar captando todo dia, sem data pra acabar.</li>' +
+        '<li><i>&#10003;</i>Cada resposta alimenta a segmentação da próxima campanha.</li>' +
+        '<li><i>&#10003;</i>Quem não comprou fica marcado pelo que respondeu.</li>' +
+      '</ul></div>' +
+      '<div class="lb"><h4 style="color:var(--yel)">Lançamento</h4><ul class="lista">' +
+        '<li><i>&#10003;</i>Vira a porta de entrada do evento e vende o ingresso no fim.</li>' +
+        '<li><i>&#10003;</i>Você entra na semana sabendo quem já está quente.</li>' +
+        '<li><i>&#10003;</i>O carrinho abre pra uma lista que já se declarou.</li>' +
+      '</ul></div>' +
+    '</div>' +
+    '<p class="sp">É a mesma engenharia, e nos dois casos a conta pode fechar sozinha: ' +
+      'no perpétuo é o low ticket que paga o anúncio, no lançamento é o ingresso. ' +
+      'Quando isso acontece, <em>a captação sai de graça</em>.</p>');
+
+  /* ---- E. a objecao dele ---- */
+  html += sec('',
+    '<div class="kick">A sua dúvida</div>' +
+    '<h3 class="sh">' + esc(objecaoTitulo()) + '</h3>' +
+    '<p class="sp">' + esc(objecaoTexto()) + '</p>');
+
+  /* ---- F. o que ele mesmo marcou ---- */
+  if (dores.length) {
+    html += sec('',
+      '<div class="kick">Nas suas palavras</div>' +
+      '<h3 class="sh">O que você já deixou de fazer</h3>' +
+      '<ul class="lista dor">' + dores.map(function(d){
+        return '<li><i>&times;</i>' + esc(d) + '</li>'; }).join('') + '</ul>' +
+      '<p class="sp">Nenhuma dessas volta sozinha. Todas têm a mesma causa: a sua base ' +
+        'não cresce enquanto o anúncio não roda.</p>');
+  }
+
+  /* ---- G. bloco de vendas ---- */
+  html += sec('meio',
+    '<h2 class="sh" style="font-size:clamp(27px,8vw,40px)">O SEU QUIZ,<br>PRONTO EM MINUTOS</h2>' +
+    '<p class="sp">A estrutura das 9 fases, o banco de perguntas e a página pronta pra ' +
+      'publicar. Você preenche com as palavras da sua ' + esc(neg) + ' e coloca no ar ' +
+      '<b>sem depender de programador e sem inventar pergunta</b>.</p>' +
+'');
+
+  /* ---- H. capacidades ---- */
+  html += sec('',
+    '<div class="kick">Capacidades</div>' +
+    '<h3 class="sh">Com isso na mão, você vai ser capaz de:</h3>' +
+    '<ul class="checks">' + [
+      'Montar um quiz do zero sem travar na primeira pergunta.',
+      'Saber quem é o lead antes de entrar na call com ele.',
+      'Parar de depender de subir verba pra vender de novo.',
+      'Fazer a mesma campanha construir base em vez de só gastar.',
+      'Ler onde o lead sai, tela por tela, e corrigir com dado.',
+      'Repetir a estrutura em outro produto seu, sem começar de novo.'
+    ].map(function(t){ return '<li><i>&#10003;</i>' + esc(t) + '</li>'; }).join('') + '</ul>');
+
+  /* ---- I. stack ---- */
+  var itens = [['🧩','O método completo', 'As 9 fases, a ordem e as 14 regras de composição.', CFG.VAL_METODO, true]]
+    .concat(BONUS.map(function(b, i){
+      return [['📗','📘','📙','📕'][i], b[0], b[1], (CFG.VAL_BONUS || [])[i], false,
+              state.presentes.indexOf(i) > -1];
+    }));
+  html += sec('',
+    '<div class="kick">🎁 ' + (state.presentes.length
+      ? 'Os seus ' + state.presentes.length + ' presentes, mais o método'
+      : 'Tudo que entra') + '</div>' +
+    '<h3 class="sh">' + (state.presentes.length
+      ? 'Tudo isso é resgatado de uma vez quando você entra'
+      : 'O método, mais os ' + BONUS.length + ' bônus') + '</h3>' +
+    '<div class="stack">' + itens.map(function(it){
+      var seu = it[5];
+      return '<div class="st-i' + (it[4] || seu ? ' principal' : '') + '">' +
+        '<span class="ico">' + (seu ? '🎁' : it[0]) + '</span>' +
+        '<span class="tx"><b>' + esc(it[1]) + '</b><span>' + esc(it[2]) + '</span></span>' +
+        '<span class="pr"><s>' + fmt(it[3]) + '</s><em>' +
+          (it[4] ? 'INCLUSO' : (seu ? 'SEU' : 'BÔNUS')) + '</em></span>' +
+      '</div>';
+    }).join('') + '</div>' +
+    /* 16/10: a caixa de preco ganhou a logo, o brilho e o botao. Sairam o
+       relogio (nao fechava nada quando zerava) e a nota interna sobre os
+       valores, que aparecia para o cliente. */
+    '<div class="preco preco-destaque">' +
+      '<img class="logo-mini" src="/img/revolucao-do-quiz.webp" alt="Revolução do Quiz" width="96" height="96">' +
+      '<span class="prod">Revolução do Quiz + ' + BONUS.length + ' bônus</span>' +
+      '<span class="de-por">De <s>' + fmt(soma) + '</s> por</span>' +
+      '<span class="por"><small>R$</small>' + esc(Number(CFG.PRECO_NUM).toFixed(2).replace('.', ',')) + '</span>' +
+      '<span class="par">' + (CFG.PARCELA ? 'ou ' + esc(CFG.PARCELA) : 'à vista, no cartão ou no Pix') + '</span>' +
+      '<span class="off">' + descontoPct(soma) + '% de desconto</span>' +
+      '<button class="btn btn-preco" id="btnPreco" type="button">Quero meu acesso agora</button>' +
+      '<span class="seguro">🔒 Pagamento seguro · Garantia de ' + CFG.GARANTIA_DIAS + ' dias</span>' +
+    '</div>' +
+    '<p class="sp">' + esc(ancoraVerba()) + '</p>');
+
+  /* ---- J. garantia ---- */
+  html += sec('',
+    '<div class="garantia"><span class="selo-g">' + CFG.GARANTIA_DIAS + '<br>dias</span>' +
+      '<div><b>Garantia incondicional</b><p class="sp">Você entra, olha tudo, e se não for ' +
+      'o que eu disse aqui, pede o dinheiro de volta dentro de ' + CFG.GARANTIA_DIAS +
+      ' dias. Sem pergunta nenhuma.</p></div></div>');
+
+  /* ---- L. fechamento ---- */
+  html += sec('meio',
+    '<div style="font-size:42px">🏁</div>' +
+    '<h3 class="sh">' + (nome ? nm + ', o ' : 'O ') + 'diagnóstico é seu. A estrutura também pode ser.</h3>' +
+    '<p class="sp">Falta o passo que transforma o que você acabou de descobrir numa página ' +
+      'no ar, trazendo lead que já chega se apresentando.</p>');
+
+  /* bifurcacao: quem nao viu a escolha (ou escolheu o metodo) ainda acha a
+     porta. Quem ja respondeu as 4 perguntas nao ve de novo: ja tem resposta */
+  if (BIF && state.caminho !== 'impl' && !state.implEnviado) {
+    html += '<div class="bif-link"><button type="button" id="bifLink">Prefere que o time da ' +
+      'Mentor Scale implemente para você? <u>Responder 4 perguntas</u></button></div>';
+  }
+
+  html += '<div class="legal">' +
+    '<p>Este diagnóstico é orientativo e não garante resultado financeiro. ' +
+      'Resultado depende de oferta, mercado e execução.</p>' +
+    '<p>Mentor Scale &middot; razão social e CNPJ entram aqui antes de subir.</p></div>';
+
+  elTela.innerHTML = html;
+
+  elFixo.classList.remove('hide');
+  document.body.classList.add('com-barra');
+  elBtnFixo.textContent = textoCta();
+  elBtnFixo.onclick = function(){ clicouComprar(chamaCall ? 'call' : 'compra'); };
+  var bp = document.getElementById('btnPreco');
+  if (bp) bp.onclick = elBtnFixo.onclick;
+  var bl = document.getElementById('bifLink');
+  if (bl) bl.onclick = function(){ guardaSaida.solta(); escolheCaminho('impl'); };
+  rodaTimer();
+
+  animaOferta();
+  guardaSaida.arma();
+  track('ViewContent', { tela:'oferta', segmento:sc.segmento, call:chamaCall });
+}
+
+/* Lead no Falume, pelo Worker. No CRM entra com as etiquetas do Perpétuo
+   e fica em Leads de entrada: quem decide é a compra. */
+function enviaCRM(evento, extra){
+  if (!ok(CFG.LEAD_API) || !/^https?:$/.test(location.protocol)) return;
+  var s = state.score || computeScores();
+  var corpo = {
+    evento: evento, name: state.nome, phone: state.whats, email: state.email,
+    porta: 'Quiz do quiz, Perpétuo (porta paga)' + (VERSAO === 'case' ? ', capa do case' : VERSAO === 'direto' ? ', capa direta' : ''),
+    temp: 'perpetuo', tag: 'PERPÉTUO · ' + (VERSAO === 'case' ? 'CASE · ' : VERSAO === 'direto' ? 'DIRETO · ' : '') + (s.nivel || ''),
+    versao: VERSAO,
+    nivel: s.nivel || '', gargalo: (AREAS[s.top] || {}).nome || '',
+    utm_source: (UTM && UTM.utm_source) || '', utm_medium: (UTM && UTM.utm_medium) || '',
+    utm_campaign: (UTM && UTM.utm_campaign) || '', utm_content: (UTM && UTM.utm_content) || '',
+    utm_term: (UTM && UTM.utm_term) || ''
+  };
+  try { var pf = perfilParaCRM(); for (var c in pf) if (pf[c] !== '') corpo[c] = pf[c]; } catch(e){}
+  for (var k in (extra || {})) corpo[k] = extra[k];
+  try { fetch(CFG.LEAD_API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(corpo), keepalive:true }); } catch(e){}
+}
+
+function sec(extra, dentro){
+  return '<section class="sec' + (extra ? ' ' + extra : '') + '">' + dentro + '</section>';
+}
+
+/* a projecao: duas curvas, a base que cresce e a que depende do anuncio */
+function svgProjecao(){
+  return '<svg viewBox="0 0 320 170" role="img" aria-label="Comparação entre lead anônimo e lead qualificado">' +
+    '<defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#FFD200" stop-opacity=".34"/>' +
+      '<stop offset="1" stop-color="#FFD200" stop-opacity="0"/></linearGradient></defs>' +
+    '<g stroke="#1E2D21" stroke-width="1">' +
+      '<line x1="20" y1="30" x2="310" y2="30"/><line x1="20" y1="70" x2="310" y2="70"/>' +
+      '<line x1="20" y1="110" x2="310" y2="110"/><line x1="20" y1="146" x2="310" y2="146"/></g>' +
+    '<path d="M26 138 C90 130 120 100 170 80 C220 60 258 38 300 24 L300 146 L26 146 Z" fill="url(#pg)"/>' +
+    '<path d="M26 138 C90 130 120 100 170 80 C220 60 258 38 300 24" stroke="#FFD200" ' +
+      'stroke-width="4" fill="none" stroke-linecap="round"/>' +
+    '<path d="M26 140 C90 139 150 141 210 139 C250 138 275 141 300 139" stroke="#5A6A5C" ' +
+      'stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="6 6"/>' +
+    '<circle cx="26" cy="138" r="5" fill="#FF6B5A"/>' +
+    '<circle cx="170" cy="80" r="5" fill="#FFD200"/>' +
+    '<circle cx="300" cy="24" r="5.5" fill="#5FCF8A"/>' +
+    '<g font-family="Manrope,sans-serif" font-size="8.5" font-weight="800">' +
+      '<text x="26" y="158" fill="#FF6B5A">CLIQUE ANÔNIMO</text>' +
+      '<text x="170" y="70" fill="#FFD200" text-anchor="middle">ELE SE APRESENTA</text>' +
+      '<text x="300" y="16" fill="#5FCF8A" text-anchor="end">CLIENTE CERTO</text>' +
+      '<text x="26" y="133" fill="#5A6A5C">sem quiz, todo lead pesa igual</text></g>' +
+  '</svg>';
+}
+
+/* Um botao so, fixo no rodape, escrito Comprar Agora. Pedido do Carlos.
+   Os CTAs que ficavam no meio da rolagem sairam: com o botao sempre visivel
+   eles viravam repeticao, e cada um deles era mais uma chance de a pessoa
+   clicar antes de ter lido o argumento que faz ela comprar. */
+function textoCta(){ return 'Comprar Agora'; }
+
+function ancoraVerba(){
+  var v = state.resp.P7;
+  var faixa = ['menos de R$ 10 mil','R$ 10 mil a R$ 30 mil','R$ 30 mil a R$ 100 mil','mais de R$ 100 mil'][v];
+  if (!faixa) return 'O valor é menor do que uma semana de anúncio na maioria das operações.';
+  return 'Você investe ' + faixa + ' por mês em anúncio. Isto aqui custa menos do que ' +
+    'um dia dessa verba, e não acaba quando a campanha para.';
+}
+
+function objecaoTitulo(){
+  var seguras = state.multi.P19 || [];
+  if (seguras.indexOf(0) > -1) return 'E se ficar igual ao de todo mundo?';
+  if (seguras.indexOf(1) > -1) return 'E se eu não souber escrever as perguntas?';
+  if (seguras.indexOf(2) > -1) return 'E se eu não tiver quem monte a parte técnica?';
+  if (seguras.indexOf(4) > -1) return 'E se não der retorno?';
+  var imp = state.resp.P23;
+  if (imp === 1) return 'E se eu não tiver tempo?';
+  if (imp === 3) return 'E se eu começar e não terminar?';
+  return 'E se eu não souber por onde começar?';
+}
+
+function objecaoTexto(){
+  var seguras = state.multi.P19 || [];
+  if (seguras.indexOf(0) > -1)
+    return 'Quiz fica igual quando se copia a tela. Aqui você recebe a engenharia, não o ' +
+      'layout: as mesmas 9 fases geram quizzes completamente diferentes conforme o ' +
+      'vocabulário e as dores que você escolhe.';
+  if (seguras.indexOf(1) > -1)
+    return 'Você não escreve do zero. O banco traz as perguntas por fase, com as opções ' +
+      'prontas, e você troca as palavras pelas do seu mercado.';
+  if (seguras.indexOf(2) > -1)
+    return 'A página é um arquivo só. Você publica onde já publica hoje, sem instalar ' +
+      'nada e sem depender de programador.';
+  if (seguras.indexOf(4) > -1)
+    return 'Não dá pra prometer retorno, e eu não vou prometer. O que dá pra garantir é ' +
+      'que você vai saber exatamente onde o lead sai, porque o quiz mede tela por tela.';
+  var imp = state.resp.P23;
+  if (imp === 1)
+    return 'O que consome tempo é decidir o que perguntar. Essa parte já está decidida. ' +
+      'O que sobra pra você é preencher, e isso é questão de minutos.';
+  if (imp === 3)
+    return 'Começar e não terminar acontece quando não existe um fim claro. Aqui o fim ' +
+      'é uma página publicada, e o caminho até ela tem nove passos numerados.';
+  return 'Por onde começar é a primeira coisa que a estrutura resolve: a ordem já está ' +
+    'definida, e você entra preenchendo a fase 1.';
+}
+
+
+/* Aviso de saida, so na pagina de oferta. No celular o gatilho e o botao
+   VOLTAR, nao o mouse saindo pelo topo: por isso os tres gatilhos juntos. */
+var guardaSaida = (function(){
+  var armado = false, mostrando = false, liberado = false;
+
+  function dispara(){
+    if (!armado || mostrando || liberado || !state.presentes.length) return;
+    mostrando = true;
+    var cx = document.getElementById('modalCx');
+    var nome = primeiroNome();
+    cx.innerHTML =
+      '<h3>&#9888;&#65039; ' + (nome ? 'Espera, ' + esc(nome) + '. ' : 'Espera. ') +
+        'Você ainda não resgatou ' + (state.presentes.length > 1 ? 'os seus ' +
+        state.presentes.length + ' presentes' : 'o seu presente') + '</h3>' +
+      '<p class="peq">Se você fechar esta página agora, o seu cofre é apagado. ' +
+        fmt(somaCofre()) + ' em presentes voltam pra fila, e o plano montado com as ' +
+        'suas respostas se perde.</p>' +
+      '<button class="btn" id="ficar" type="button">Resgatar os meus presentes</button>' +
+      '<button class="btn fantasma" id="sair" type="button">Não quero, prefiro perder</button>';
+    document.getElementById('modal').classList.add('on');
+    document.getElementById('ficar').addEventListener('click', function(){
+      fechaModal(); mostrando = false;
+      clicouComprar(state.resp.P25 === 0 ? 'call' : 'compra');
+    });
+    document.getElementById('sair').addEventListener('click', function(){
+      fechaModal(); mostrando = false; liberado = true; desarma();
+    });
+    track('AvisoDeSaida', { presentes: state.presentes.length });
+  }
+
+  function porMouse(e){ if (e.clientY <= 4 && !e.relatedTarget) dispara(); }
+  function porVoltar(){ dispara(); try { history.pushState({ qq:1 }, ''); } catch(e){} }
+  function porFechar(e){
+    if (liberado || !state.presentes.length) return;
+    e.preventDefault(); e.returnValue = '';
+  }
+  function desarma(){
+    armado = false;
+    document.removeEventListener('mouseout', porMouse);
+    window.removeEventListener('popstate', porVoltar);
+    window.removeEventListener('beforeunload', porFechar);
+  }
+  return {
+    arma: function(){
+      if (armado || liberado) return;
+      armado = true;
+      document.addEventListener('mouseout', porMouse);
+      try { history.pushState({ qq:1 }, ''); } catch(e){}
+      window.addEventListener('popstate', porVoltar);
+      window.addEventListener('beforeunload', porFechar);
+    },
+    /* solta assim que a pessoa clica em comprar: atrito no checkout nao serve */
+    solta: function(){ liberado = true; desarma(); }
+  };
+})();
+
+function clicouComprar(tipo){
+  guardaSaida.solta();
+  rastreia('checkout');
+  var s = state.score || computeScores();
+  try {
+    if (sessionStorage.getItem('qq_click') !== '1') {
+      sessionStorage.setItem('qq_click', '1');
+      track('InitiateCheckout', { tipo: tipo, segmento: s.segmento });
+    }
+  } catch(e){ track('InitiateCheckout', { tipo: tipo, segmento: s.segmento }); }
+
+  if (!ok(CFG.CHECKOUT_URL)) { toast('Checkout ainda não configurado.'); return; }
+  var u = CFG.CHECKOUT_URL +
+    (CFG.CHECKOUT_URL.indexOf('?') > -1 ? '&' : '?') +
+    'name='  + encodeURIComponent(state.nome) +
+    '&email='+ encodeURIComponent(state.email) +
+    '&phone='+ encodeURIComponent(state.whats) +
+    (typeof BANDIT !== 'undefined' && BANDIT ? '&src=' + encodeURIComponent(BANDIT.bid) + '&sck=' + encodeURIComponent(BANDIT.bid) : '') +
+    /* 16/10: as cinco UTMs do anuncio seguem para a Zouti (antes iam so source
+       e campaign, e medium, content e term se perdiam no checkout) */
+    ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].map(function(k){
+      return UTM && UTM[k] ? '&' + k + '=' + encodeURIComponent(UTM[k]) : '';
+    }).join('');
+  enviaCRM('checkout');
+  if (CFG.CHECKOUT_MODE === 'popup') window.open(u, '_blank', 'noopener');
+  else location.href = u;
+}
+
+/* A pagina final aparece por blocos conforme a rolagem, as barras do
+   comparativo crescem e o numero sobe junto com elas. */
+function animaOferta(){
+  var calmo = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var secoes = [].slice.call(elTela.querySelectorAll('.sec'));
+  var pilares = [].slice.call(elTela.querySelectorAll('#pilares .pil-i'));
+  var etapas  = [].slice.call(elTela.querySelectorAll('#etapas .etapa'));
+
+  function contaAte(el, alvo, dur){
+    var t0 = null, pronto = false;
+    function passo(ts){
+      if (pronto) return;
+      if (t0 === null) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur);
+      el.textContent = Math.round(alvo * (1 - Math.pow(1 - p, 3))) + '%';
+      if (p < 1) requestAnimationFrame(passo); else pronto = true;
+    }
+    requestAnimationFrame(passo);
+    /* rede de seguranca: com a aba em segundo plano o rAF nao roda, e o numero
+       ficaria preso no zero. Aqui ele termina no valor certo de qualquer jeito. */
+    setTimeout(function(){ if (!pronto){ pronto = true; el.textContent = alvo + '%'; } }, dur + 90);
+  }
+
+  function abre(sec){
+    if (sec.classList.contains('in')) return;
+    sec.classList.add('in');
+    [].forEach.call(sec.querySelectorAll('.pil-i'), function(p){ p.classList.add('vis'); });
+  }
+
+  /* Cada card do comparativo enche sozinho, quando ELE chega na tela. Antes
+     isso vinha junto com a secao, e a secao e tao alta que ja entra no
+     primeiro quadro: as barras apareciam cheias e o movimento se perdia. */
+  function enche(card){
+    if (card.classList.contains('cheio')) return;
+    card.classList.add('cheio');
+    [].forEach.call(card.querySelectorAll('.cmp-t i'), function(b){
+      var pct = parseInt(b.getAttribute('data-pct'), 10) || 0;
+      requestAnimationFrame(function(){ b.style.width = pct + '%'; });
+    });
+    [].forEach.call(card.querySelectorAll('.cmp-v b'), function(n){
+      contaAte(n, parseInt(n.getAttribute('data-n'), 10) || 0, 1150);
+    });
+  }
+  var cards = [].slice.call(elTela.querySelectorAll('.cmp-l'));
+  if (calmo || !('IntersectionObserver' in window)) {
+    cards.forEach(enche);
+  } else {
+    var obsC = new IntersectionObserver(function(ents){
+      ents.forEach(function(e){
+        if (!e.isIntersecting) return;
+        enche(e.target);
+        obsC.unobserve(e.target);
+      });
+    }, { threshold:.55 });
+    cards.forEach(function(c){ obsC.observe(c); });
+  }
+
+  if (calmo || !('IntersectionObserver' in window)) {
+    secoes.forEach(abre);
+    pilares.forEach(function(p){ p.classList.add('vis'); });
+    if (calmo) return;
+  } else {
+    var obs = new IntersectionObserver(function(ents){
+      ents.forEach(function(e){
+        if (!e.isIntersecting) return;
+        abre(e.target);
+        obs.unobserve(e.target);
+      });
+    }, { rootMargin:'0px 0px -6% 0px', threshold:.12 });
+    secoes.forEach(function(sc){ obs.observe(sc); });
+    /* a primeira dobra nao espera rolagem */
+    if (secoes[0]) abre(secoes[0]);
+    if (secoes[1]) abre(secoes[1]);
+  }
+
+  /* Sem ciclo de destaque: o Carlos pediu pra tirar os movimentos. O que
+     sobra de animacao e a entrada de cada bloco na rolagem, que serve pra
+     guiar a leitura, e nao pra chamar atencao sozinha. */
+  if (state.timers) { state.timers.forEach(clearInterval); state.timers = []; }
+}
+
+/* =====================================================================
+   11. BOOT
+   ===================================================================== */
+function boot(){
+  state.flow = buildFlow();
+  irPara(0);
+  track('PageView', {});
+  /* os players comecam a subir agora, enquanto a pessoa le a capa: quando
+     o primeiro video chegar, ele ja esta pronto na memoria */
+  aquecePlayers();
+}
+boot();
+
+})();
+</script>
+
+<script>
+/* Rede de fundo da Revolução do Quiz: pontos que descem devagar e se ligam
+   como neurônio. 24 quadros por segundo, parada em prefers-reduced-motion,
+   congela com a aba escondida. Mesma peça do quiz da Implementação, com a
+   cor amarela deste quiz. */
+(function () {
+  if (!document.body) return;
+  var parado = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var cv = document.createElement('canvas');
+  cv.className = 'rede'; cv.setAttribute('aria-hidden', 'true');
+  document.body.insertBefore(cv, document.body.firstChild);
+  var ctx = cv.getContext('2d'); if (!ctx) return;
+  var COR = '255,210,0', AREIA = '242,240,230', pts = [], larg = 0, alt = 0, D = 130;
+  function medir() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    larg = window.innerWidth; alt = window.innerHeight;
+    cv.width = Math.round(larg * dpr); cv.height = Math.round(alt * dpr);
+    cv.style.width = larg + 'px'; cv.style.height = alt + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var cel = larg < 560; D = cel ? 115 : 140;
+    var n = cel ? 32 : 46; pts = [];
+    for (var i = 0; i < n; i++) pts.push({ x: Math.random() * larg, y: Math.random() * alt,
+      vy: .18 + Math.random() * .42, fase: Math.random() * 6.28, r: 1.1 + Math.random() * 1.6, brilho: Math.random() < .14 });
+  }
+  function desenhar(t) {
+    ctx.clearRect(0, 0, larg, alt);
+    var D2 = D * D, i, j, a, b, dx, dy, d2;
+    for (i = 0; i < pts.length; i++) { a = pts[i];
+      for (j = i + 1; j < pts.length; j++) { b = pts[j]; dx = a.x - b.x; dy = a.y - b.y; d2 = dx * dx + dy * dy;
+        if (d2 < D2) { ctx.strokeStyle = 'rgba(' + COR + ',' + (0.26 * (1 - d2 / D2)).toFixed(3) + ')'; ctx.lineWidth = .8;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); } } }
+    for (i = 0; i < pts.length; i++) { a = pts[i];
+      if (a.brilho) { var pulso = .55 + .45 * Math.sin(t / 700 + a.fase);
+        ctx.fillStyle = 'rgba(' + COR + ',' + (0.14 * pulso).toFixed(3) + ')'; ctx.beginPath(); ctx.arc(a.x, a.y, a.r * 5, 0, 6.28); ctx.fill(); }
+      ctx.fillStyle = a.brilho ? 'rgba(' + COR + ',.9)' : 'rgba(' + AREIA + ',.5)';
+      ctx.beginPath(); ctx.arc(a.x, a.y, a.r, 0, 6.28); ctx.fill(); }
+  }
+  function andar(t) { for (var i = 0; i < pts.length; i++) { var p = pts[i]; p.y += p.vy; p.x += Math.sin(t / 2600 + p.fase) * .18;
+    if (p.y > alt + 12) { p.y = -12; p.x = Math.random() * larg; } } }
+  var ultimo = 0, rodando = true, INT = 1000 / 24;
+  function quadro(t) { requestAnimationFrame(quadro); if (!rodando || t - ultimo < INT) return; ultimo = t; andar(t); desenhar(t); }
+  var esp = null;
+  window.addEventListener('resize', function () { clearTimeout(esp); esp = setTimeout(function () { medir(); desenhar(0); }, 160); });
+  document.addEventListener('visibilitychange', function () { rodando = !document.hidden; ultimo = 0; });
+  medir(); desenhar(0); if (!parado) requestAnimationFrame(quadro);
+})();
+</script>
+</body>
+</html>

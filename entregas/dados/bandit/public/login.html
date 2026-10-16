@@ -1,0 +1,7 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bandit login</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#00012A;color:#fff;font-family:Manrope,system-ui,sans-serif}
+form{background:#0D0E35;border:1px solid #24265e;border-radius:16px;padding:28px;width:min(340px,calc(100vw - 32px))}
+b{color:#00DAFE;letter-spacing:.12em}input,button{width:100%;margin-top:12px;padding:10px;border-radius:10px;border:1px solid #24265e;background:#15164a;color:#fff;font:inherit}
+button{background:#00DAFE;color:#00012A;font-weight:800;cursor:pointer}p{color:#F2545B;font-size:13px}</style></head>
+<body><form method="post" action="/api/login"><b>BANDIT</b><input type="password" name="senha" placeholder="Senha do painel" autofocus><button>Entrar</button>
+<script>if(location.search.indexOf('erro')>-1)document.write('<p>Senha errada.</p>')</script></form></body></html>
