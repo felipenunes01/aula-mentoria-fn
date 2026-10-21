@@ -11,3 +11,6 @@ Registre aqui, com data, o que funcionou, o que não funcionou e o que o dono pe
 - 2026-10-21: Token Meta está como variável de ambiente (META_ACCESS_TOKEN), não como Network secret;
   META_AD_ACCOUNT_ID não existe. Conta usada nos testes: CA 02 | Edu (act_829367608660058),
   página Edunocorre + @edunocorre, Pixel Edu Corre. Origem: teste de acesso à Graph API.
+- 2026-10-21: Regras de otimização do dono (CPA-meta, CPA máx., janela de 72h menos 6h, 24h depois de alterações)
+  estão registradas em entregas/trafego-pago/2026-10-21-otimizacao-ca02-edu.md. A conta "teste123"
+  não existe: confirmar a conta pelo nome ou act_ antes de qualquer pausa. Origem: pedido de otimização.
