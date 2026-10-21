@@ -9,7 +9,9 @@
    de um para o outro. Ex.: pesquisa-publico, depois oferta-preco, depois copy,
    depois design-criativos, depois trafego-pago.
 4. Se o usuário citar um especialista pelo nome, respeite e use esse.
-5. Pedido que não encaixa em setor nenhum: use a skill `xquads` para
+5. Tráfego pago: o subagente `trafego-pago` sempre usa a skill `traffic-masters`
+   (Xquads) como método, com o workflow `wf-campaign-launch` para campanha nova.
+6. Pedido que não encaixa em setor nenhum: use a skill `xquads` para
    diagnosticar.
 
 ## Setores
