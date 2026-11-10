@@ -34,3 +34,6 @@ Registre aqui, com data, o que funcionou, o que não funcionou e o que o dono pe
 - 2026-11-10: Deploy na Cloudflare Pages a partir da sessão: o `wrangler pages deploy` falha porque o
   proxy sobrescreve o token JWT de upload. A API direta de deployments (multipart com manifest de hashes
   blake3) funciona. Publicar e mexer em DNS exigem confirmação explícita do dono. Origem: deploy do hub.
+- 2026-11-10: Deploy de arquivos estáticos no Pages pela sessão "funciona" na API, mas o site responde 500
+  porque os arquivos não sobem. Solução: publicar como função `_worker.js` com o HTML embutido
+  (`hub/deploy_cloudflare.py`). Sempre testar a URL publicada antes de dizer que está no ar. Origem: hub fora do ar.

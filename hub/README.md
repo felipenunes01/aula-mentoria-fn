@@ -14,5 +14,6 @@ Os sites dos produtos são projetos separados, construídos depois do hub.
 - Projeto: `felipenunes-hub`, na conta Cloudflare do dono. Domínio: `eusoufelipenunes.com.br` e `www`.
 - O endereço provisório é `felipenunes-hub.pages.dev`.
 - DNS: um CNAME de `@` e um de `www` para `felipenunes-hub.pages.dev`, ambos com proxy (nuvem laranja).
-- Atualizar: rodar `python3 hub/build.py` e enviar `hub/dist/` (Cloudflare → Workers & Pages →
-  felipenunes-hub → Create deployment, ou pela API de deployments com o token da conta).
+- Atualizar: `python3 hub/build.py && python3 hub/deploy_cloudflare.py`. O hub sobe como função
+  (`_worker.js`) com o HTML e as imagens embutidos. O upload de arquivos estáticos falha pelo proxy da
+  sessão e o site responde 500, por isso não usar esse caminho. O www redireciona para o domínio principal.
