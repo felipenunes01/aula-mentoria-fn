@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#020816">
+<title>Felipe Nunes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&family=Sora:wght@600;700;800&display=swap">
+<style>
+/* Hub do link da bio: avatar + nome + 3 cards empilhados, cada um na identidade do seu produto. */
+:root {
+  color-scheme: dark;
+  --bg: #020816;
+  --text: #f2f5fc;
+  --muted: #a7b4d1;
+  --font-display: "Sora", "Segoe UI", system-ui, sans-serif;
+  --font-body: "DM Sans", "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: radial-gradient(640px 420px at 50% -60px, rgba(10, 79, 255, 0.3), transparent 70%), var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+.hub { max-width: 500px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 44px 40px; display: grid; gap: 26px; }
+
+.head { display: grid; justify-items: center; gap: 14px; }
+.avatar { width: 150px; height: 150px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 30% 25%, #10307e, #061b4d 60%, #020a20); border: 2px solid rgba(60, 142, 255, 0.55); box-shadow: 0 0 0 8px rgba(10, 79, 255, 0.1), 0 20px 60px -10px rgba(10, 79, 255, 0.55); }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar svg { width: 62%; height: auto; }
+.handle { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 23px; }
+
+.cards { display: grid; gap: 14px; }
+.card { --a1: #0a4fff; --a2: #3c8eff; --deep: #0530b8; --surface: #041a4d; position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 46%; min-height: 172px; border-radius: 20px; overflow: hidden; text-decoration: none; color: var(--text); border: 1px solid color-mix(in srgb, var(--a2) 35%, transparent); background: linear-gradient(120deg, color-mix(in srgb, var(--surface) 70%, #000) 0%, #03081a 70%); box-shadow: 0 16px 44px -22px rgba(0, 0, 0, 0.95); transition: transform 0.18s ease, box-shadow 0.2s, border-color 0.2s; }
+.card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--a2) 70%, transparent); box-shadow: 0 18px 50px -18px color-mix(in srgb, var(--a1) 65%, transparent); }
+.card:focus-visible { outline: 2px solid var(--a2); outline-offset: 3px; }
+.card--pld { --a1: #0a5bff; --a2: #39a8ff; --deep: #0640c9; --surface: #061b4d; }
+.card--strategy { --a1: #0a4fff; --a2: #3c8eff; --deep: #0530b8; --surface: #041a4d; }
+.card--expert { --a1: #1568ff; --a2: #52b0ff; --deep: #0a46c4; --surface: #08183f; }
+
+.txt { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 16px; padding: 18px 10px 18px 18px; min-width: 0; }
+.logo { width: auto; max-width: 100%; object-fit: contain; object-position: left center; }
+.card--pld .logo { height: 54px; }
+.card--strategy .logo, .card--expert .logo { height: 76px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 8px 22px; border-radius: 10px; font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; white-space: nowrap; background: linear-gradient(90deg, var(--a1), var(--a2) 60%, var(--deep)); box-shadow: 0 10px 26px -8px color-mix(in srgb, var(--a1) 85%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.25); }
+
+.art { position: relative; margin: 6px 6px 6px 0; border-radius: 16px 16px 16px 44px; overflow: hidden; background: radial-gradient(120% 90% at 80% 10%, color-mix(in srgb, var(--a1) 55%, transparent), transparent 65%), linear-gradient(160deg, var(--surface), #030a1f); border: 1px solid color-mix(in srgb, var(--a2) 22%, transparent); }
+.art img, .art svg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 16px); opacity: 0; background: #0d1d45; border: 1px solid rgba(124, 164, 255, 0.32); color: var(--text); padding: 11px 16px; border-radius: 10px; font-size: 14px; transition: opacity 0.25s, transform 0.25s; pointer-events: none; max-width: calc(100% - 32px); text-align: center; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 370px) { .card { grid-template-columns: minmax(0, 1fr) 40%; } .btn { padding: 8px 15px; font-size: 13px; } .card--strategy .logo, .card--expert .logo { height: 64px; } }
+@media (prefers-reduced-motion: reduce) { .card, .toast { transition: none; } }
+</style>
+
+</head>
+<body>
+<main class="hub">
+  <header class="head">
+    <div class="avatar" id="avatar">
+      <svg viewBox="0 0 120 80" role="img" aria-label="FN"><text x="4" y="62" font-family="Sora, sans-serif" font-weight="800" font-style="italic" font-size="64" fill="#fff">FN</text><path d="M14 74 C 50 72, 92 60, 116 6 C 100 50, 64 70, 14 74 Z" fill="#3c8eff"/></svg>
+    </div>
+    <h1 class="handle" id="handle">Felipe Nunes</h1>
+  </header>
+
+  <nav class="cards" aria-label="Programas">
+    <a class="card card--pld" data-produto="pld">
+      <div class="txt">
+        <img class="logo" src="assets/logo-pld.webp" alt="PLD, Profissão Lançador Digital" width="143" height="54">
+        <span class="btn">Saiba mais</span>
+      </div>
+      <div class="art" aria-hidden="true"><img src="assets/arte-pld.webp" alt="" style="object-position:88% 22%"></div>
+    </a>
+
+    <a class="card card--strategy" data-produto="estrategistas">
+      <div class="txt">
+        <img class="logo" src="assets/logo-strategy.webp" alt="FN Strategy, Mentoria para Estrategistas" width="152" height="76">
+        <span class="btn">Saiba mais</span>
+      </div>
+      <div class="art" aria-hidden="true">
+        <svg viewBox="0 0 200 200" preserveAspectRatio="xMaxYMid slice"><g stroke="#3c8eff" stroke-opacity=".22" stroke-width="1"><path d="M0 50H200M0 100H200M0 150H200M50 0V200M100 0V200M150 0V200"/></g><path d="M20 160 L70 120 L110 132 L176 52" stroke="#3c8eff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="70" cy="120" r="7" fill="#fff"/><circle cx="110" cy="132" r="7" fill="#fff"/><circle cx="176" cy="52" r="9" fill="#0a4fff" stroke="#fff" stroke-width="3"/></svg>
+      </div>
+    </a>
+
+    <a class="card card--expert" data-produto="mentores">
+      <div class="txt">
+        <img class="logo" src="assets/logo-expert.webp" alt="FN Expert, Mentoria para Especialistas" width="130" height="76">
+        <span class="btn">Saiba mais</span>
+      </div>
+      <div class="art" aria-hidden="true">
+        <svg viewBox="0 0 200 200" preserveAspectRatio="xMaxYMid slice"><circle cx="112" cy="104" r="62" fill="none" stroke="#52b0ff" stroke-opacity=".35" stroke-width="2"/><circle cx="112" cy="104" r="38" fill="none" stroke="#52b0ff" stroke-opacity=".6" stroke-width="2"/><circle cx="112" cy="104" r="14" fill="#1568ff"/><path d="M14 190 C 90 186, 160 150, 196 20" stroke="#1568ff" stroke-width="8" fill="none" stroke-linecap="round"/></svg>
+      </div>
+    </a>
+  </nav>
+</main>
+
+<script>
+/* ===== CONFIGURAÇÃO DO HUB: troque só aqui ===== */
+var HUB = {
+  arroba: "",      // ex.: "@felipenunes" (vazio = mostra "Felipe Nunes")
+  foto: "",        // URL da foto de perfil (vazio = monograma FN)
+  links: {         // site externo de cada produto
+    pld: "",
+    estrategistas: "",
+    mentores: ""
+  }
+};
+
+(function () {
+  if (HUB.arroba) document.getElementById("handle").textContent = HUB.arroba;
+  if (HUB.foto) { var img = new Image(); img.src = HUB.foto; img.alt = HUB.arroba || "Felipe Nunes"; var av = document.getElementById("avatar"); av.textContent = ""; av.appendChild(img); }
+  var toast;
+  function aviso(msg) {
+    if (!toast) { toast = document.createElement("div"); toast.className = "toast"; toast.setAttribute("role", "status"); document.body.appendChild(toast); }
+    toast.textContent = msg; toast.classList.add("show");
+    clearTimeout(toast._t); toast._t = setTimeout(function () { toast.classList.remove("show"); }, 3000);
+  }
+  window.dataLayer = window.dataLayer || [];
+  document.querySelectorAll("[data-produto]").forEach(function (a) {
+    var key = a.getAttribute("data-produto"), url = HUB.links[key];
+    if (url) { a.href = url; a.target = "_blank"; a.rel = "noopener"; }
+    else { a.href = "#"; }
+    a.addEventListener("click", function (e) {
+      window.dataLayer.push({ event: "clique_hub", produto: key });
+      if (!url) { e.preventDefault(); aviso("Link em configuração."); }
+    });
+  });
+})();
+</script>
+</body></html>

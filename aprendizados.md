@@ -22,3 +22,6 @@ Registre aqui, com data, o que funcionou, o que não funcionou e o que o dono pe
 - 2026-11-10: Logos novos do FN Expert e do FN Strategy chegaram em PNG transparente (azul-marinho):
   para fundo escuro basta trocar o azul-marinho por branco mantendo o alfa original (não converter
   para RGB antes, senão o fundo vira preto). Origem: arquivos enviados pelo dono.
+- 2026-11-10: O hub do link da bio é um site SEPARADO dos sites dos produtos (pasta `hub/`). Ele deve
+  ser simples, como a referência: avatar, nome e 3 cards na identidade de cada produto, com link externo.
+  Não misturar o hub com as páginas dos programas e fazer uma entrega por vez, na ordem pedida. Origem: correção do dono.
