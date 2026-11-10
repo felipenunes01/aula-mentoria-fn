@@ -37,3 +37,6 @@ Registre aqui, com data, o que funcionou, o que não funcionou e o que o dono pe
 - 2026-11-10: Deploy de arquivos estáticos no Pages pela sessão "funciona" na API, mas o site responde 500
   porque os arquivos não sobem. Solução: publicar como função `_worker.js` com o HTML embutido
   (`hub/deploy_cloudflare.py`). Sempre testar a URL publicada antes de dizer que está no ar. Origem: hub fora do ar.
+- 2026-11-10: O navegador interno do Instagram tem a tela útil mais baixa (testar ~430x700, além de
+  390x844, 375x667 e 360x640). Card com altura fixa corta o conteúdo: usar `minmax(min-content, 1fr)`
+  e medir no teste se algum texto, botão ou arte passa da borda do card. Origem: print do dono no iPhone.
