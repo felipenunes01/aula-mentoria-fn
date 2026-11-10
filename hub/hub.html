@@ -51,10 +51,8 @@ body { background: radial-gradient(640px 420px at 50% -60px, rgba(10, 79, 255, 0
 
 <main class="hub">
   <header class="head">
-    <div class="avatar" id="avatar">
-      <svg viewBox="0 0 120 80" role="img" aria-label="FN"><text x="4" y="62" font-family="Sora, sans-serif" font-weight="800" font-style="italic" font-size="64" fill="#fff">FN</text><path d="M14 74 C 50 72, 92 60, 116 6 C 100 50, 64 70, 14 74 Z" fill="#3c8eff"/></svg>
-    </div>
-    <h1 class="handle" id="handle">Felipe Nunes</h1>
+    <div class="avatar" id="avatar"><img src="{{img:foto-felipe}}" alt="Felipe Nunes" width="150" height="150"></div>
+    <h1 class="handle" id="handle">@eusoufelipenunes</h1>
   </header>
 
   <nav class="cards" aria-label="Programas">
@@ -91,8 +89,8 @@ body { background: radial-gradient(640px 420px at 50% -60px, rgba(10, 79, 255, 0
 <script>
 /* ===== CONFIGURAÇÃO DO HUB: troque só aqui ===== */
 var HUB = {
-  arroba: "",      // ex.: "@felipenunes" (vazio = mostra "Felipe Nunes")
-  foto: "",        // URL da foto de perfil (vazio = monograma FN)
+  arroba: "@eusoufelipenunes",
+  foto: "",        // para trocar a foto, coloque a URL aqui (vazio = foto atual)
   links: {         // site externo de cada produto
     pld: "",
     estrategistas: "",

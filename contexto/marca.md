@@ -10,7 +10,7 @@
 - Referências (perfis, marcas, criadores que inspiram):
 
 ## Dados reais (2026-11-10, Documento-Mestre do Ecossistema V1.0)
-- Marca pessoal: Felipe Nunes | Mentor e Estrategista.
+- Marca pessoal: Felipe Nunes | Mentor e Estrategista. Instagram: @eusoufelipenunes. Foto de perfil oficial: `hub/assets/foto-felipe.webp`.
 - Posicionamento: "Transformo conhecimento em negócios digitais e formo os profissionais que fazem isso acontecer."
 - Submarcas e paletas oficiais (quadros de marca enviados pelo dono):
   - **PLD, Profissão Lançador Digital**: Navy #061B4D, Blue #0A5BFF, Light Blue #39A8FF, White, Black. Logo: "PLD" com barras e seta.
