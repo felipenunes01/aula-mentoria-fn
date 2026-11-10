@@ -10,3 +10,8 @@ Registre aqui, com data, o que funcionou, o que não funcionou e o que o dono pe
   precisa estar liberado na rede do ambiente. Página de vendas do dono terá 2 versões (VSL e
   simples) usando o visual do "Cansei Dessa Vida". Origem: pedido do dono, estrutura em
   `entregas/design/estrutura-pagina-vendas-modelo-cdv.md`.
+- 2026-11-10: Ecossistema Felipe Nunes construído em `site/` (build único gera site real e versão de
+  validação). Página publicada no claude.ai só grava dados para quem está logado, então formulário
+  público real precisa de backend próprio (Apps Script + Google Sheets em `site/backend/`). No CSS de
+  produção, `[hidden]` precisa de `display:none !important`, senão os passos do formulário aparecem
+  todos juntos. Origem: pedido do dono, Documento-Mestre do Ecossistema V1.0.
