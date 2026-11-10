@@ -28,3 +28,6 @@ Registre aqui, com data, o que funcionou, o que não funcionou e o que o dono pe
 - 2026-11-10: Hub deve caber em UMA tela no celular, sem rolagem (testar em 390x844 e 375x667). Foto de
   perfil com enquadramento aberto (ombros), não colada no rosto. Instagram com ícone + @ clicável.
   PLD tem identidade branca com logo preto para se diferenciar das mentorias (azul-marinho). Origem: dono.
+- 2026-11-10: No hub não mostrar preço nem rótulos como "entrada" ou "comece por aqui". Cada card leva só
+  a descrição e o botão: "Profissão Lançador Digital", "Mentoria em grupo para estrategistas digitais",
+  "Mentoria individual para experts e especialistas". Origem: dono.
