@@ -11,7 +11,7 @@ cada um na identidade visual do seu produto, levando para o **site externo** de 
 Os sites dos produtos são projetos separados, construídos depois do hub.
 
 ## Publicação (Cloudflare Pages)
-- Projeto: `felipenunes-hub`, na conta Cloudflare do dono. Domínio: `eusoufelipenunes.com.br` e `www`.
+- Projeto: `felipenunes-hub`, na conta Cloudflare do dono. **No ar em https://eusoufelipenunes.com.br** desde 2026-11-10 (www redireciona).
 - O endereço provisório é `felipenunes-hub.pages.dev`.
 - DNS: um CNAME de `@` e um de `www` para `felipenunes-hub.pages.dev`, ambos com proxy (nuvem laranja).
 - Atualizar: `python3 hub/build.py && python3 hub/deploy_cloudflare.py`. O hub sobe como função
