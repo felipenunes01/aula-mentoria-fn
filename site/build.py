@@ -34,7 +34,7 @@ ROUTES = [  # (fragmento, pasta de saída, título, descrição, indexar)
     ("obrigado-estrategistas", "obrigado/estrategistas", "Aplicação enviada | Mentoria de Estrategistas", "", False),
     ("obrigado-mentores", "obrigado/mentores", "Aplicação enviada | Mentoria de Mentores", "", False),
 ]
-LOGOS = {"pld": "logo-pld.webp", "strategy": "logo-strategy.webp", "expert": "logo-expert.webp"}
+LOGOS = {"pld": "logo-pld.webp", "strategy": "logo-strategy.webp", "expert": "logo-expert.webp", "arte-pld": "arte-pld.webp"}
 
 
 def fill(html: str, logo_src) -> str:
