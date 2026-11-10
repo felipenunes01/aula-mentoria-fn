@@ -12,6 +12,9 @@ window.FN_CONFIG = {
     // URL da foto profissional (ex.: "/assets/felipe.webp"). Vazio = mostra o monograma FN.
     foto: "",
     instagram: "", // ex.: "https://instagram.com/seuperfil"
+    arroba: "", // ex.: "@felipenunes". Vazio = mostra o nome.
+    // Fotos do lado direito de cada card do link da bio. Vazio = arte da marca.
+    fotosCards: { pld: "", estrategistas: "", mentores: "" },
   },
 
   // WhatsApp comercial: só dígitos, com país e DDD. Ex.: "5511999998888"

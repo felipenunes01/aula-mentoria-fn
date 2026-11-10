@@ -98,6 +98,8 @@
   $$("[data-privacy]").forEach(function (a) { if (C.politicaPrivacidade) a.setAttribute("href", C.politicaPrivacidade); else { a.removeAttribute("href"); a.setAttribute("aria-disabled", "true"); a.title = "Política de privacidade em preparação"; } });
   $$("[data-terms]").forEach(function (a) { if (C.termosUso) a.setAttribute("href", C.termosUso); else a.hidden = true; });
   $$("[data-foto]").forEach(function (box) { if ((C.marca || {}).foto) box.innerHTML = '<img src="' + C.marca.foto + '" alt="Felipe Nunes" width="76" height="76" style="width:100%;height:100%;object-fit:cover">'; });
+  $$("[data-handle]").forEach(function (e) { if ((C.marca || {}).arroba) e.textContent = C.marca.arroba; });
+  $$("[data-card-foto]").forEach(function (box) { var f = ((C.marca || {}).fotosCards || {})[box.getAttribute("data-card-foto")]; if (f) box.innerHTML = '<img src="' + f + '" alt="">'; });
   $$("[data-ano]").forEach(function (e) { e.textContent = new Date().getFullYear(); });
 
   /* ---------- WhatsApp ---------- */

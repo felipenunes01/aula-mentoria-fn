@@ -15,3 +15,7 @@ Registre aqui, com data, o que funcionou, o que não funcionou e o que o dono pe
   público real precisa de backend próprio (Apps Script + Google Sheets em `site/backend/`). No CSS de
   produção, `[hidden]` precisa de `display:none !important`, senão os passos do formulário aparecem
   todos juntos. Origem: pedido do dono, Documento-Mestre do Ecossistema V1.0.
+- 2026-11-10: Hub do ecossistema no formato link da bio (referência enviada pelo dono): avatar redondo,
+  nome/@, cards-banner empilhados com logo + "SAIBA MAIS" à esquerda e imagem à direita. Fotos dos cards
+  e @ configuráveis em `site/src/config.js` (`marca.arroba`, `marca.fotosCards`). Origem: print de
+  referência do dono.

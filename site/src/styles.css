@@ -254,3 +254,30 @@ p { margin: 0; }
 /* Visibilidade por rota (versão com várias páginas no mesmo documento) */
 [data-page] { display: none; }
 [data-page].is-active { display: block; }
+
+/* ===== LINK DA BIO (hub) ===== */
+.linkbio { background: radial-gradient(700px 420px at 50% -80px, rgba(10, 79, 255, 0.32), transparent 70%), var(--ink-0); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 48px; min-height: 100vh; }
+.lb-wrap { max-width: 520px; margin: 0 auto; display: grid; gap: 28px; }
+.lb-head { display: grid; justify-items: center; text-align: center; gap: 6px; }
+.lb-avatar { width: 148px; height: 148px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 30% 25%, #10307e, var(--navy) 60%, #020a20); border: 2px solid rgba(60, 142, 255, 0.55); box-shadow: 0 0 0 8px rgba(10, 79, 255, 0.1), 0 20px 60px -10px rgba(10, 79, 255, 0.55); margin-bottom: 10px; }
+.lb-avatar svg { width: 62%; height: auto; }
+.lb-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.lb-handle { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: 0.01em; }
+.lb-role { color: var(--muted); font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; }
+.lb-bio { color: var(--muted); font-size: 15.5px; max-width: 40ch; margin-top: 6px; font-weight: 300; text-wrap: balance; }
+.lb-list { display: grid; gap: 14px; }
+.lb-card { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 44%; min-height: 176px; border-radius: 20px; border: 1px solid rgba(124, 164, 255, 0.22); background: linear-gradient(135deg, #0b1630 0%, #050b1c 60%, #03070f 100%); text-decoration: none; overflow: hidden; transition: transform 0.18s ease, border-color 0.2s, box-shadow 0.2s; box-shadow: 0 14px 40px -20px rgba(0, 0, 0, 0.9); }
+.lb-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--a2) 60%, transparent); box-shadow: 0 18px 50px -18px color-mix(in srgb, var(--a1) 60%, transparent); }
+.lb-card--featured { border-color: color-mix(in srgb, var(--a2) 55%, transparent); box-shadow: 0 18px 60px -22px color-mix(in srgb, var(--a1) 80%, transparent); }
+.lb-txt { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 10px; padding: 18px 12px 18px 18px; min-width: 0; }
+.lb-logo { height: 46px; width: auto; max-width: 100%; object-fit: contain; object-position: left center; }
+.lb-logo--tall { height: 60px; }
+.lb-title { font-family: var(--font-display); font-weight: 700; font-size: 17px; line-height: 1.2; color: var(--a3); text-transform: uppercase; letter-spacing: 0.02em; }
+.lb-sub { font-size: 13.5px; color: var(--muted); }
+.lb-sub b { color: var(--text); font-family: var(--font-display); }
+.lb-badge { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--a3); padding: 4px 8px; border-radius: 6px; background: color-mix(in srgb, var(--a1) 30%, transparent); border: 1px solid color-mix(in srgb, var(--a2) 40%, transparent); }
+.lb-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 8px 22px; border-radius: 10px; font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: linear-gradient(90deg, var(--a1), var(--a2) 60%, var(--a-deep)); box-shadow: 0 10px 26px -8px color-mix(in srgb, var(--a1) 85%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.25); margin-top: 4px; white-space: nowrap; }
+.lb-art { position: relative; margin: 6px 6px 6px 0; border-radius: 16px 16px 16px 40px; overflow: hidden; background: radial-gradient(120% 90% at 80% 10%, color-mix(in srgb, var(--a1) 55%, transparent), transparent 65%), linear-gradient(160deg, #0a1f55, #040c22); border: 1px solid rgba(124, 164, 255, 0.18); }
+.lb-art svg, .lb-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.lb-quote { text-align: center; color: var(--dim); font-size: 14px; font-style: italic; max-width: 44ch; margin: 4px auto 0; text-wrap: balance; }
+@media (max-width: 380px) { .lb-card { grid-template-columns: minmax(0, 1fr) 40%; } .lb-btn { padding: 8px 16px; font-size: 13px; } .lb-logo { height: 40px; } }
