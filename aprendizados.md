@@ -31,3 +31,6 @@ Registre aqui, com data, o que funcionou, o que não funcionou e o que o dono pe
 - 2026-11-10: No hub não mostrar preço nem rótulos como "entrada" ou "comece por aqui". Cada card leva só
   a descrição e o botão: "Profissão Lançador Digital", "Mentoria em grupo para estrategistas digitais",
   "Mentoria individual para experts e especialistas". Origem: dono.
+- 2026-11-10: Deploy na Cloudflare Pages a partir da sessão: o `wrangler pages deploy` falha porque o
+  proxy sobrescreve o token JWT de upload. A API direta de deployments (multipart com manifest de hashes
+  blake3) funciona. Publicar e mexer em DNS exigem confirmação explícita do dono. Origem: deploy do hub.
