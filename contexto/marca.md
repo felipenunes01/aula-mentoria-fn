@@ -13,7 +13,8 @@
 - Marca pessoal: Felipe Nunes | Mentor e Estrategista. Instagram: @eusoufelipenunes. Foto de perfil oficial: `hub/assets/foto-felipe.webp`.
 - Posicionamento: "Transformo conhecimento em negócios digitais e formo os profissionais que fazem isso acontecer."
 - Submarcas e paletas oficiais (quadros de marca enviados pelo dono):
-  - **PLD, Profissão Lançador Digital**: Navy #061B4D, Blue #0A5BFF, Light Blue #39A8FF, White, Black. Logo: "PLD" com barras e seta.
+  - **PLD, Profissão Lançador Digital**: cor predominante BRANCA (produto de entrada, diferenciado das mentorias),
+    logo com o nome em PRETO, curva e barras azuis (Blue #0A5BFF, Light Blue #39A8FF). Arquivo: `hub/assets/logo-pld-preto.webp`.
   - **FN Strategy, Mentoria para Estrategistas**: Navy #041A4D, Blue #0A4FFF, Light Blue #3C8EFF, White, Black.
   - **FN Expert, Mentoria para Especialistas**: Navy #08183F, Blue #1568FF, Light Blue #52B0FF, White, Black.
 - Logos (fundo transparente, versão para fundo escuro): `site/src/assets/logo-*.webp`. FN Expert e FN Strategy
