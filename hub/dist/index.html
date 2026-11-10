@@ -4,7 +4,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wdth,wght@100..125,400..800&display=swap">
 <style>
 /* Hub do link da bio: tudo em uma tela. Topo (foto + Instagram) e 3 camadas que dividem o restante da altura. */
 :root {
@@ -13,13 +13,13 @@
   --text: #f2f5fc;
   --muted: #a7b4d1;
   --ink: #0b0f1a;
-  --font-display: "Sora", "Segoe UI", system-ui, sans-serif;
-  --font-body: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Saira", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Saira", "Segoe UI", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { margin: 0; height: 100%; }
-body { background: radial-gradient(560px 380px at 50% -40px, rgba(10, 79, 255, 0.34), transparent 70%), var(--bg); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+body { background: radial-gradient(560px 380px at 50% -40px, rgba(10, 79, 255, 0.34), transparent 70%), var(--bg); color: var(--text); font-family: var(--font-body); font-stretch: 110%; -webkit-font-smoothing: antialiased; }
 
 .hub { max-width: 480px; height: 100%; min-height: 100dvh; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: clamp(18px, 3.5vh, 36px) clamp(16px, 3vh, 28px); display: flex; flex-direction: column; gap: clamp(14px, 2.4vh, 22px); }
 
@@ -27,9 +27,9 @@ body { background: radial-gradient(560px 380px at 50% -40px, rgba(10, 79, 255, 0
 .head { display: grid; justify-items: center; gap: clamp(8px, 1.4vh, 12px); flex: none; }
 .avatar { width: clamp(92px, 15vh, 126px); aspect-ratio: 1; border-radius: 50%; padding: 3px; background: conic-gradient(from 200deg, #0a4fff, #52b0ff, #ffffff, #3c8eff, #0a4fff); box-shadow: 0 14px 44px -10px rgba(10, 79, 255, 0.7); max-width: 100%; }
 .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: 50% 30%; display: block; border: 3px solid var(--bg); background: #000; }
-.name { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(18px, 2.6vh, 21px); letter-spacing: 0.01em; text-align: center; }
-.role { display: block; font-family: var(--font-body); font-weight: 500; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
-.ig { display: inline-flex; align-items: center; gap: 9px; padding: 7px 14px 7px 8px; border-radius: 999px; text-decoration: none; color: var(--text); font-weight: 600; font-size: 14.5px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); transition: background 0.2s, border-color 0.2s; }
+.name { margin: 0; font-family: var(--font-display); font-stretch: 125%; font-weight: 700; font-size: clamp(17px, 2.5vh, 20px); letter-spacing: 0.04em; text-transform: uppercase; text-align: center; }
+.role { display: block; font-family: var(--font-body); font-stretch: 112%; font-weight: 500; font-size: 11.5px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.ig { display: inline-flex; align-items: center; gap: 9px; padding: 7px 14px 7px 8px; border-radius: 999px; text-decoration: none; color: var(--text); font-stretch: 110%; font-weight: 600; font-size: 14.5px; letter-spacing: 0.02em; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); transition: background 0.2s, border-color 0.2s; }
 .ig:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.26); }
 .ig:focus-visible { outline: 2px solid #52b0ff; outline-offset: 3px; }
 .ig-ico { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%); flex: none; }
@@ -45,8 +45,8 @@ body { background: radial-gradient(560px 380px at 50% -40px, rgba(10, 79, 255, 0
 
 .txt { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: clamp(6px, 1.2vh, 10px); padding: 12px 6px 12px 16px; min-width: 0; }
 .tag { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #9fc4ff; }
-.desc { font-family: var(--font-display); font-weight: 700; font-size: clamp(14.5px, 2.1vh, 17px); line-height: 1.28; text-wrap: balance; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: clamp(36px, 5vh, 42px); padding: 6px 14px; border-radius: 10px; font-family: var(--font-display); font-weight: 700; font-size: 12.5px; letter-spacing: 0.06em; max-width: 100%; text-transform: uppercase; color: #fff; white-space: nowrap; background: linear-gradient(90deg, var(--a1), var(--a2) 60%, var(--deep)); box-shadow: 0 10px 24px -8px rgba(10, 79, 255, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.25); }
+.desc { font-family: var(--font-display); font-stretch: 118%; font-weight: 700; font-size: clamp(13.5px, 2vh, 16px); line-height: 1.25; letter-spacing: 0.01em; text-transform: uppercase; text-wrap: balance; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: clamp(36px, 5vh, 42px); padding: 6px 14px; border-radius: 10px; font-family: var(--font-display); font-stretch: 125%; font-weight: 700; font-size: 12px; letter-spacing: 0.08em; max-width: 100%; text-transform: uppercase; color: #fff; white-space: nowrap; background: linear-gradient(90deg, var(--a1), var(--a2) 60%, var(--deep)); box-shadow: 0 10px 24px -8px rgba(10, 79, 255, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.25); }
 .btn svg { width: 14px; height: 14px; }
 
 .art { position: relative; margin: 6px 6px 6px 0; border-radius: 14px 14px 14px 38px; overflow: hidden; background: #030a22; border: 1px solid rgba(124, 164, 255, 0.16); }

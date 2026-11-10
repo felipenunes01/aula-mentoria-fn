@@ -20,5 +20,5 @@
 - Logos (fundo transparente, versão para fundo escuro): `site/src/assets/logo-*.webp`. FN Expert e FN Strategy
   atualizados em 2026-11-10 para a versão com "FN" em cima e o nome embaixo, com linhas laterais na assinatura.
 - Arte do PLD (curva com brilho azul sobre fundo escuro): `site/src/assets/arte-pld.webp`.
-- Fontes do site: Sora (títulos e botões) e DM Sans (texto). Visual escuro inspirado no modelo
+- Tipografia alinhada aos logos: Saira expandida (Google Fonts, `font-stretch` 110 a 125%), títulos e botões em caixa alta. Usada no hub desde 2026-11-10; aplicar também nos sites dos produtos.
   "Cansei Dessa Vida" (`entregas/design/estrutura-pagina-vendas-modelo-cdv.md`).
