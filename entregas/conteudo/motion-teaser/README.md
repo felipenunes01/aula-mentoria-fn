@@ -1,4 +1,14 @@
-# Motion teaser: Dos Bastidores à Transformação (v1)
+# Motion teaser: Dos Bastidores à Transformação
+
+## v2: com narração e trilha (versão oficial)
+- **Arquivo:** `teaser-dos-bastidores-v2-com-audio.mp4`, 1080×1920, 30 fps, 24,2 s, áudio AAC a -14 LUFS (padrão do Instagram).
+- **Narração:** voz neural Piper "Cadu" (pt-BR, licença aberta), um semitom mais grave, com EQ, compressão e reverb leve.
+- **Trilha:** sintetizada do zero em `audio_mix.py`, livre de direitos. Grave atmosférico, impactos nas batidas,
+  pulsação nos bastidores, queda de tensão, riser e impacto no "HOJE" (21,6 s). A trilha abaixa quando há voz.
+- **Sincronia:** `render.js` estica cada cena para casar com a duração real de cada frase.
+  As frases começam em 0,9 / 6,3 / 10,4 / 14,5 / 21,55 s.
+
+## v1 (sem áudio)
 
 - **Arquivo:** `teaser-dos-bastidores-v1.mp4`, 1080×1920, 30 fps, 23 s, sem áudio.
 - **Fonte:** `teaser.html`. A animação inteira é uma função do tempo e é renderizada quadro a quadro
