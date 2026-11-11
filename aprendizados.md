@@ -43,3 +43,6 @@ Registre aqui, com data, o que funcionou, o que não funcionou e o que o dono pe
 - 2026-11-10: Motion em vídeo é viável na sessão: animação em HTML/canvas como função do tempo,
   renderizada quadro a quadro com Playwright e ffmpeg (MP4 1080x1920). Sem gerar voz nem trilha: entregar
   junto a tabela de tempos para encaixar no CapCut. Base: `entregas/conteudo/motion-teaser/`. Origem: pedido do dono.
+- 2026-11-11: Pipeline de motion com GSAP funciona na sessão: GSAP e fontes via npm, copiados para `assets/`
+  (sem CDN no render); timeline pausada + `seek(t)`; Playwright captura PNGs; ffmpeg monta o MP4. Conferir a
+  contagem de PNGs e o determinismo (renderizar o quadro de novo e comparar com `cmp`). Base: `entregas/conteudo/motion-gsap/`.
