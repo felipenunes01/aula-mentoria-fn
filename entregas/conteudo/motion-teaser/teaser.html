@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<title>Dos Bastidores à Transformação</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wdth,wght@100..125,300..800&display=swap">
+<style>
+/* Teaser 9:16 renderizado quadro a quadro: tudo é função do tempo t (window.renderAt). */
+:root { --navy: #030b24; --black: #010309; --off: #f3efe6; --gold: #d8b46a; --gold2: #f4dfa8; --blue: #1d5bff; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--black); }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--black); font-family: "Saira", sans-serif; }
+canvas { position: absolute; inset: 0; }
+.txt { position: absolute; left: 90px; right: 90px; text-align: center; color: var(--off); font-stretch: 118%; text-transform: uppercase; will-change: opacity, transform, filter; }
+.l1 { font-weight: 300; font-size: 46px; letter-spacing: 0.26em; white-space: nowrap; left: 0; right: 0; }
+.l2 { font-weight: 800; font-size: 92px; line-height: 1.04; letter-spacing: 0.02em; }
+.gold { background: linear-gradient(100deg, #b98c3e 0%, var(--gold2) 45%, var(--gold) 60%, #a77a30 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.small { font-weight: 400; font-size: 40px; letter-spacing: 0.12em; text-transform: none; font-stretch: 110%; }
+.rule { position: absolute; left: 50%; height: 3px; background: linear-gradient(90deg, transparent, var(--gold2), transparent); transform: translateX(-50%); }
+.vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 80% at 50% 50%, transparent 45%, rgba(0,0,0,.85) 100%); }
+.grain { position: absolute; inset: -50%; pointer-events: none; opacity: .07; mix-blend-mode: overlay; }
+.flash { position: absolute; inset: 0; background: #fff; pointer-events: none; }
+.fade { position: absolute; inset: 0; background: #000; pointer-events: none; }
+</style></head>
+<body>
+<div id="stage">
+  <canvas id="c" width="1080" height="1920"></canvas>
+  <div class="txt l1" id="t1" style="top:900px">Durante muito tempo…</div>
+
+  <div class="txt l1" id="t2a" style="top:780px">O público via</div>
+  <div class="txt l2" id="t2b" style="top:860px">os resultados.</div>
+
+  <div class="txt l1" id="t3a" style="top:760px">Mas existia</div>
+  <div class="txt l2" id="t3b" style="top:840px">uma história<br><span class="gold">por trás.</span></div>
+
+  <div class="txt l1" id="t4a" style="top:740px">Nem toda história</div>
+  <div class="txt l2" id="t4b" style="top:820px">deve ficar<br>escondida.</div>
+
+  <div class="txt l1" id="t5a" style="top:700px">Dos bastidores</div>
+  <div class="txt l2 gold" id="t5b" style="top:775px;font-size:76px;white-space:nowrap;left:0;right:0">à transformação</div>
+  <div class="rule" id="rule" style="top:905px;width:0"></div>
+  <div class="txt l2" id="t5c" style="top:950px;font-size:190px;letter-spacing:.08em">Hoje.</div>
+  <div class="txt small" id="t5d" style="top:1180px">Uma nova fase começa.</div>
+
+  <canvas class="grain" id="g" width="540" height="960" style="width:2160px;height:3840px"></canvas>
+  <div class="vignette"></div>
+  <div class="flash" id="flash" style="opacity:0"></div>
+  <div class="fade" id="fade" style="opacity:1"></div>
+</div>
+<script>
+const W = 1080, H = 1920, DUR = 23;
+const ctx = document.getElementById("c").getContext("2d");
+const gctx = document.getElementById("g").getContext("2d");
+const $ = id => document.getElementById(id);
+
+// pseudo-aleatório determinístico
+function rnd(i) { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const outE = x => 1 - Math.pow(1 - x, 3);
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+// visibilidade de um trecho: entra em [a,a+i], sai em [b-o,b]
+function win(t, a, b, i = .6, o = .5) { return clamp(Math.min(prog(t, a, a + i), 1 - prog(t, b - o, b))); }
+
+const dust = Array.from({ length: 140 }, (_, i) => ({ x: rnd(i) * W, y: rnd(i + 500) * H, r: .6 + rnd(i + 900) * 2.2, s: .2 + rnd(i + 1300) * .8, p: rnd(i + 1700) * 6.28 }));
+
+function beams(t, strength, hue) {
+  // feixes de luz de palco vindos do topo
+  const n = 5;
+  for (let k = 0; k < n; k++) {
+    const base = W * (0.1 + k * 0.2) + Math.sin(t * .35 + k) * 40;
+    const sway = Math.sin(t * .5 + k * 1.7) * 160;
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    const a = strength * (0.10 + 0.06 * Math.sin(t * 1.3 + k * 2));
+    g.addColorStop(0, `rgba(${hue},${a * 2.2})`);
+    g.addColorStop(.55, `rgba(${hue},${a * .7})`);
+    g.addColorStop(1, `rgba(${hue},0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(base - 18, -10); ctx.lineTo(base + 18, -10);
+    ctx.lineTo(base + sway + 260, H * 1.05); ctx.lineTo(base + sway - 260, H * 1.05);
+    ctx.closePath(); ctx.fill();
+  }
+}
+
+function particles(t, alpha, col) {
+  for (const d of dust) {
+    const y = (d.y - t * 22 * d.s + H) % H;
+    const x = d.x + Math.sin(t * .6 + d.p) * 14;
+    ctx.fillStyle = `rgba(${col},${alpha * (.35 + .65 * Math.abs(Math.sin(t + d.p)))})`;
+    ctx.beginPath(); ctx.arc(x, y, d.r, 0, 6.28); ctx.fill();
+  }
+}
+
+function screens(t, alpha) {
+  // monitores e telas de operação, desfocados, em bastidores
+  ctx.save(); ctx.filter = 'blur(7px)';
+  for (let i = 0; i < 9; i++) {
+    const cx = W * (.12 + (i % 3) * .38) + Math.sin(t * .2 + i) * 30;
+    const cy = H * (.22 + Math.floor(i / 3) * .28) + Math.cos(t * .17 + i) * 30 - (t - 8.5) * 18;
+    const w = 260 + rnd(i + 40) * 160, h = w * .6;
+    const g = ctx.createLinearGradient(cx, cy, cx + w, cy + h);
+    g.addColorStop(0, `rgba(29,91,255,${alpha * .16})`); g.addColorStop(1, `rgba(10,30,90,${alpha * .05})`);
+    ctx.fillStyle = g; ctx.fillRect(cx - w / 2, cy - h / 2, w, h);
+    // linhas de dados
+    ctx.strokeStyle = `rgba(150,190,255,${alpha * .22})`; ctx.lineWidth = 3; ctx.beginPath();
+    for (let j = 0; j <= 10; j++) { const px = cx - w / 2 + 20 + j * (w - 40) / 10; const py = cy + h * .2 - (rnd(i * 20 + j) * .5 + j * .04) * h * .8; j ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function burst(t, at, alpha) {
+  // flashes de câmera / palco
+  const p = prog(t, at, at + .5);
+  if (p <= 0 || p >= 1) return 0;
+  return alpha * (1 - p) * (1 - p);
+}
+
+function door(t, open, alpha) {
+  // fresta de luz se abrindo no centro
+  const w = 6 + open * 700;
+  const g = ctx.createLinearGradient(W / 2 - w, 0, W / 2 + w, 0);
+  g.addColorStop(0, "rgba(244,223,168,0)"); g.addColorStop(.5, `rgba(244,223,168,${alpha * .55})`); g.addColorStop(1, "rgba(244,223,168,0)");
+  ctx.fillStyle = g; ctx.fillRect(W / 2 - w, 0, w * 2, H);
+  const r = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 300 + open * 900);
+  r.addColorStop(0, `rgba(255,240,205,${alpha * .35})`); r.addColorStop(1, "rgba(255,240,205,0)");
+  ctx.fillStyle = r; ctx.fillRect(0, 0, W, H);
+}
+
+function setTxt(id, op, dy = 0, blur = 0, sc = 1, ls = null) {
+  const e = $(id); e.style.opacity = op; e.style.transform = `translateY(${dy}px) scale(${sc})`; e.style.filter = blur ? `blur(${blur}px)` : "none";
+  if (ls !== null) e.style.letterSpacing = ls;
+}
+
+function grain(t) {
+  const f = Math.floor(t * 24), img = gctx.createImageData(540, 960);
+  for (let i = 0; i < img.data.length; i += 4) { const v = rnd(i * .37 + f * 9973) * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  gctx.putImageData(img, 0, 0);
+}
+
+window.renderAt = function (t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = "#010309"; ctx.fillRect(0, 0, W, H);
+  // zoom lento de câmera
+  const z = 1 + t * .006; ctx.setTransform(z, 0, 0, z, W * (1 - z) / 2, H * (1 - z) / 2);
+
+  // fundo azul-marinho que acende aos poucos
+  const bgA = clamp(prog(t, 0, 4) * .9) * (1 - .6 * prog(t, 13.5, 15.5)) + .5 * prog(t, 17.5, 18.6);
+  const bg = ctx.createRadialGradient(W / 2, H * .38, 0, W / 2, H * .38, H * .8);
+  bg.addColorStop(0, `rgba(10,30,86,${bgA * .9})`); bg.addColorStop(1, "rgba(1,3,9,0)");
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  // CENA 1 e 2: palco (feixes) | CENA 3: bastidores (telas) | CENA 4: fresta | CENA 5: revelação
+  const stage = clamp(prog(t, .3, 4)) * (1 - prog(t, 8.2, 9));
+  if (stage > 0) beams(t, stage * (1 + .6 * prog(t, 4.5, 6)), "120,160,255");
+  const back = win(t, 8.4, 14, 1, 1.2);
+  if (back > 0) screens(t, back);
+  const crack = win(t, 13.6, 19.2, 1.8, .4);
+  if (crack > 0) door(t, ease(prog(t, 15, 18.6)), crack);
+  const reveal = prog(t, 18.6, 20);
+  if (reveal > 0) { beams(t, reveal * .9, "216,180,106"); }
+  particles(t, .5 * clamp(prog(t, .5, 3)), t > 18.6 ? "244,223,168" : "170,200,255");
+
+  // TEXTOS (sincronizados com a narração)
+  // C1 0–4.5
+  const a1 = win(t, 1.2, 4.4, 1.2, .5);
+  setTxt("t1", a1, (1 - outE(prog(t, 1.2, 3))) * 20, (1 - prog(t, 1.2, 2.4)) * 10, 1, `${.4 - .14 * outE(prog(t, 1.2, 4))}em`);
+  // C2 4.5–8.5 (cortes nas batidas)
+  setTxt("t2a", win(t, 4.6, 8.3, .3, .3), 0, 0);
+  const a2b = win(t, 5.4, 8.3, .15, .3);
+  setTxt("t2b", a2b, 0, 0, 1 + .06 * (1 - outE(prog(t, 5.4, 6.2))));
+  // C3 8.5–13.5
+  setTxt("t3a", win(t, 9, 13.3, .7, .6), (1 - outE(prog(t, 9, 10))) * 24, (1 - prog(t, 9, 9.8)) * 8);
+  setTxt("t3b", win(t, 9.9, 13.3, .9, .6), (1 - outE(prog(t, 9.9, 11))) * 30, (1 - prog(t, 9.9, 10.8)) * 10);
+  // C4 13.5–18.5 (pausa de tensão antes do fim)
+  setTxt("t4a", win(t, 14.2, 18.2, .8, .6), (1 - outE(prog(t, 14.2, 15.2))) * 20, (1 - prog(t, 14.2, 15)) * 8);
+  setTxt("t4b", win(t, 15.1, 18.2, .9, .6), 0, (1 - prog(t, 15.1, 16)) * 12, 1.04 - .04 * outE(prog(t, 15.1, 18)));
+  // C5 18.5–23 revelação
+  setTxt("t5a", prog(t, 19.2, 20), (1 - outE(prog(t, 19.2, 20.2))) * 20, 0, 1, `${.5 - .18 * outE(prog(t, 19.2, 21))}em`);
+  setTxt("t5b", prog(t, 19.8, 20.8), (1 - outE(prog(t, 19.8, 20.8))) * 24, (1 - prog(t, 19.8, 20.5)) * 10);
+  $("rule").style.width = (outE(prog(t, 20.4, 21.4)) * 620) + "px";
+  setTxt("t5c", prog(t, 21.2, 21.25), 0, 0, 1.18 - .18 * outE(prog(t, 21.2, 21.7)));
+  setTxt("t5d", prog(t, 21.9, 22.5), (1 - outE(prog(t, 21.9, 22.6))) * 14);
+
+  // flashes: batidas da cena 2 + impacto do HOJE.
+  const fl = Math.max(burst(t, 4.6, .35), burst(t, 5.4, .55), burst(t, 6.4, .3), burst(t, 7.3, .3), burst(t, 21.2, .8));
+  $("flash").style.opacity = fl;
+  // abertura no preto e corte seco no final
+  $("fade").style.opacity = Math.max(1 - prog(t, 0, .9), prog(t, 22.85, 22.9));
+  grain(t);
+};
+window.DUR = DUR;
+renderAt(0);
+</script>
+</body></html>
